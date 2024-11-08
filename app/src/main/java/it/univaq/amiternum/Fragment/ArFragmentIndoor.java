@@ -140,6 +140,7 @@ public class ArFragmentIndoor extends Fragment {
         arFragment.onDestroy();
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
