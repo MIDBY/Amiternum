@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_ui"
+    app:startDestination="@id/navHome">
+
+    <fragment
+        android:id="@+id/navHome"
+        android:name="it.univaq.amiternum.Fragment.ListFragment"
+        android:label="ListFragment"
+        tools:layout="@layout/list_fragment">
+        <action
+            android:id="@+id/action_navHome_to_navIndoor"
+            app:destination="@id/navIndoor" />
+        <action
+            android:id="@+id/action_navHome_to_navOutdoor"
+            app:destination="@id/navOutdoor" />
+    </fragment>
+    <fragment
+        android:id="@+id/navIndoor"
+        android:name="it.univaq.amiternum.Fragment.ArFragmentIndoor"
+        android:label="ArFragment"
+        tools:layout="@layout/ar_fragment">
+        <action
+            android:id="@+id/action_navIndoor_to_navHome"
+            app:destination="@id/navHome" />
+    </fragment>
+    <fragment
+        android:id="@+id/navOutdoor"
+        android:name="it.univaq.amiternum.OutdoorActivity"
+        android:label="activity_outdoor"
+        tools:layout="@layout/activity_outdoor" >
+        <action
+            android:id="@+id/action_navOutdoor_to_navHome"
+            app:destination="@id/navHome" />
+    </fragment>
+</navigation>

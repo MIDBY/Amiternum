@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navIndoor"
+        android:icon="@drawable/sofa_ic"
+        android:title="@string/indoor" />
+    <item
+        android:id="@+id/navHome"
+        android:icon="@drawable/baseline_home_24"
+        android:title="@string/home" />
+    <item
+        android:id="@+id/navOutdoor"
+        android:icon="@drawable/baseline_sunny_24"
+        android:title="@string/outdoor" />
+</menu>

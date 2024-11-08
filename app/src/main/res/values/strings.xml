@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Amiternum</string>
+    <string name="app_subtitle">La storia</string>
+    <string name="app_subtitle2">nel mondo moderno</string>
+    <string name="icon">icona</string>
+    <string name="app_test">APP TEST</string>
+    <string name="start">Start</string>
+    <string name="punti">Punti</string>
+    <string name="luoghi_inseriti">Luoghi inseriti</string>
+    <string name="fotocamera">Fotocamera</string>
+    <string name="indoor">Indoor</string>
+    <string name="home">Home</string>
+    <string name="outdoor">Outdoor</string>
+    <string name="ar">AR</string>
+    <string name="refresh">Refresh</string>
+    <string name="tracking">Tracking…</string>
+    <string name="title">Museo Munda e Sito Amiternum</string>
+    <string name="subtitle">Scopri le nostre opere</string>
+    <string name="outdoorButton">Visita il sito archeologico Amiternum</string>
+    <string name="descriptionText">Descrizione: </string>
+    <string name="latitudeText">Latitudine: </string>
+    <string name="longitudeText">Longitudine: </string>
+    <string name="altitudeText">Altitudine: </string>
+    <string name="altitudeMeasuring">m slm</string>
+    <string name="distanceText1">Sei distante </string>
+    <string name="distanceText2"> m dal punto più vicino: </string>
+    <string name="audioResourceText">Risorsa Audio</string>
+    <string name="playerZero">00:00</string>
+    <string name="videoResourceText">Risorsa Video</string>
+    <string name="arResourceText">Vedi oggetto in ar</string>
+    <string name="titleSettingAlert">Oh oh, il GPS non è attivato!</string>
+    <string name="messageSettingAlert">Il GPS non è attivo. Vuoi andare nelle impostazioni di sistema?</string>
+    <string name="okSettingAlert">Vai alle impostazioni</string>
+    <string name="cancelSettingAlert">Rifiuta</string>
+    <string name="enableGPSRequest">Il GPS è disattivato, attivalo per continuare</string>
+    <string name="authRequestText">Autorizzazione necessaria</string>
+</resources>
