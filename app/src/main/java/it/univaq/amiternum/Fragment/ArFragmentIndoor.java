@@ -1,24 +1,21 @@
 package it.univaq.amiternum.Fragment;
 
 import android.app.AlertDialog;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
@@ -34,52 +31,48 @@ import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
-import com.google.ar.sceneform.assets.RenderableSource;
-import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
-import com.google.ar.sceneform.ux.ArFragment;
+import com.google.ar.sceneform.rendering.Renderable;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.CaptureActivity;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.util.ArrayList;
 
 import it.univaq.amiternum.Database.DB;
 import it.univaq.amiternum.Model.Oggetto3D;
-import it.univaq.amiternum.Model.Punto;
 import it.univaq.amiternum.R;
+import it.univaq.amiternum.Utility.ConversionCallback;
+import it.univaq.amiternum.Utility.Converter;
 import it.univaq.amiternum.Utility.GetData;
+import it.univaq.amiternum.Utility.OnRequest;
 import it.univaq.amiternum.Utility.Pref;
 import it.univaq.amiternum.helpers.CameraHelper;
-import it.univaq.amiternum.helpers.LocationHelper;
 
-public class ArFragmentIndoor extends Fragment implements LocationListener{
+public class ArFragmentIndoor extends Fragment {
 
     //TODO: Scegliere QRCode o riconoscimento immagini?
     //          -QrCode tramite libreria zxing, inserendo un'activity tra mainActivity e IndoorActivity
     //          -Riconoscitore immagine tramite AugmentedImageDatabase nel sito ufficiale https://developers.google.com/ar/develop/java/augmented-images/guide?hl=it
     //TODO: Video nel mainActivity non mostra la barra dei controlli sul cellulare
 
-    private ArFragment arFragment;
+    private ArSceneView arSceneView;
     private Session session;
     private ArrayList<Oggetto3D> oggetti = new ArrayList<>();
+    private Oggetto3D oggetto;
+    private String oggettoPath;
+    private boolean first = true;
     boolean created = false;
 
-    private final ActivityResultLauncher<String> launcher = registerForActivityResult (
-            new ActivityResultContracts.RequestPermission(),
-            new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean result) {
-                    if(result){
-                        locationHelper.start(requireContext(), ArFragmentIndoor.this::onLocationChanged);
-                    } else {
-                        Toast.makeText(requireContext(), getString(R.string.authRequestText), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-    );
-    private final LocationHelper locationHelper = new LocationHelper(launcher);
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> { if(!result)Toast.makeText(requireContext(), getString(R.string.authRequestText),Toast.LENGTH_SHORT).show(); }
     );
+
+    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(
+            new ScanContract(),
+            result -> { if(result.getContents() != null) oggetto = handleQRCode(result.getContents());
+    });
 
 
     @Nullable
@@ -91,19 +84,16 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        arFragment = view.findViewById(R.id.ar_scene_viewFragment);
-
         if (!CameraHelper.checkCameraPermission(requireContext())){
             CameraHelper.permission(requireContext(), launcherCamera);
         }
+        arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
 
-        locationHelper.start(requireContext(), this::onLocationChanged);
-        arSceneView
         try {
             session = new Session(requireContext());
             Config config = new Config(session);
             config.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
-            config.setGeospatialMode(Config.GeospatialMode.ENABLED);
+            config.setDepthMode(Config.DepthMode.AUTOMATIC);
             session.configure(config);
             arSceneView.setupSession(session);
         } catch (UnavailableArcoreNotInstalledException | UnavailableApkTooOldException |
@@ -111,14 +101,16 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
             e.printStackTrace();
             Log.d("ARSession", "Problema nella creazione della sessione");
         }
-
         if(Pref.load(requireContext(),"firstAccess",true)){
             oggetti = GetData.downloadOggetto(requireContext());
         } else {
             new Thread(() -> oggetti = (ArrayList<Oggetto3D>) DB.getInstance(requireContext()).getOggettoDao().findAll()).start();
-            //oggetti = GetData.loadOggetto(requireContext());
         }
+
+        view.findViewById(R.id.launchScanner).setOnClickListener(v -> startQrCodeScanner());
     }
+
+
 
     private void onUpdateFrame(FrameTime frameTime) {
         Frame frame = arSceneView.getArFrame();
@@ -126,91 +118,60 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
         if (frame == null) {
             return;
         }
-        
-        if(session.getEarth().getTrackingState() != TrackingState.TRACKING){
-            Log.d("ARSession", "Stato di tracciamento: " + session.getEarth().getTrackingState());
+
+        if(frame.getCamera().getTrackingState() != TrackingState.TRACKING)
             return;
-        }
 
         if (!created) {
-
             //CREAZIONE NODO ORIGINE
-            double originLatitude = session.getEarth().getCameraGeospatialPose().getLatitude();
-            double originLongitude = session.getEarth().getCameraGeospatialPose().getLongitude();
-            double originAltitude = session.getEarth().getCameraGeospatialPose().getAltitude();
-
-            Anchor originAnchor = session.getEarth().createAnchor(originLatitude,originLongitude,originAltitude,0f,0f,0f,1f);
+            float[] position = {0, 0, 0, (float) -0.75};
+            float[] rotation = { 0, 0, 0, 1};
+            Anchor originAnchor = session.createAnchor(new Pose(position, rotation));
             AnchorNode originAnchorNode = new AnchorNode(originAnchor);
             arSceneView.getScene().addChild(originAnchorNode);
 
-            if (oggetti != null){
-                //capisci prima che oggetto sta cercando
-                Oggetto3D oggetto = oggetti.get(0);
 
-                ModelRenderable.builder()
-                        .setSource(requireContext(), RenderableSource.builder()
-                                .setSource(requireContext(), Uri.parse(oggetto.getFirstUrlFileByExtension("obj")))
-                                        .setScale(0.75f)
-                                        .setRecenterMode(RenderableSource.RecenterMode.ROOT)
-                                        .build()
-                                )
-                        .setRegistryId(oggetto.getFirstUrlFileByExtension("obj"))
-                        .build()
-                        .thenAccept(modelRenderable -> addNodeToScene(modelRenderable, session.))
-                        .exceptionally(throwable -> {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                            builder.setMessage(throwable.getMessage()).show();
-                            return null;
-                        });
-                /*
-                for (int i = 0; i < oggetti.size(); i++) {
-                    TextView textViewCicle = (TextView) getLayoutInflater().inflate(R.layout.ar_textview, null);
-                    String textString = punti.get(i).getLuogo() + "\n" + punti.get(i).getDescrizione();
-                    textViewCicle.setText(textString);
+            if (oggetti != null && oggetto != null) {
+                if(first) {
+                    Converter.convertToGltf(oggetto.getObjUrlFile(), oggetto.getMtlUrlFile(), oggetto.getImgUrlFiles(), new ConversionCallback() {
+                        @Override
+                        public void onConversionComplete(String outputPath) {
+                            requireActivity().runOnUiThread(() -> oggettoPath = outputPath);
+                        }
 
-                    int index = i;
+                        @Override
+                        public void onConversionFailed() {
+                            requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Errore nel caricamento dell'oggetto 3D", Toast.LENGTH_LONG).show());
+                        }
+                    });
+                    first = !first;
+                }
+                if(oggettoPath != null) {
+                    ModelRenderable.builder()
+                            .setSource(requireContext(), Uri.parse(oggettoPath))
+                            .setRegistryId(oggetto.getId())
+                            .build()
+                            .thenAccept(modelRenderable -> {
+                                Node node = new Node();
+                                node.setRenderable(modelRenderable);
+                                node.setWorldPosition(new Vector3(0f, 0f, -1f));
+                                arSceneView.getScene().addChild(node);
+                                created = true;
 
-                    ViewRenderable.builder()
-                        .setView(requireContext(), textViewCicle)
-                        .build()
-                        .thenAccept(renderable -> {
-                            double latitude = punti.get(index).getLatitudine();
-                            double longitude = punti.get(index).getLongitudine();
-                            double altitudeCycle = session.getEarth().getCameraGeospatialPose().getAltitude();
-                            Pose worldPose = session.getEarth().getPose(latitude, longitude, altitudeCycle, 0f, 0f, 0f, 1f);
-                            Anchor anchorCycle = session.createAnchor(worldPose);
-                            Node textViewNodeCycle = new Node();
-                            float scaleFactor = 3f;
-                            textViewNodeCycle.setRenderable(renderable);
-                            textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
-                            float[] deviceRotation = worldPose.getRotationQuaternion();
-                            Quaternion quaternion = new Quaternion(deviceRotation[0], deviceRotation[1], deviceRotation[2], deviceRotation[3]);
-                            Vector3 direction = Vector3.subtract(textViewNodeCycle.getWorldPosition(),
-                                    new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
-                            Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
-                            Quaternion finalRotation = Quaternion.multiply(quaternion.inverted(), lookRotation);
-                            textViewNodeCycle.setWorldRotation(finalRotation);
-                            AnchorNode anchorNodeCycle = new AnchorNode(anchorCycle);
-                            anchorNodeCycle.addChild(textViewNodeCycle);
-                            originAnchorNode.addChild(anchorNodeCycle);
-                        });
-                    created = true;
-                }*/
+                            })
+                            .exceptionally(throwable -> {
+                                Log.e("ARModel", "Unable to load model: " + throwable.getMessage());
+                                Toast.makeText(requireContext(), "Unable to load model", Toast.LENGTH_LONG).show();
+                                return null;
+                            });
+                }
             }
         }
-    }
-
-    private void addNodeToScene(ModelRenderable modelRenderable, Anchor anchor) {
-        AnchorNode anchorNode = new AnchorNode(anchor);
-        anchorNode.setRenderable(modelRenderable);
-        arSceneView.getScene().addChild(anchorNode);
-        created = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(this::onLocationChanged);
         if (arSceneView != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             arSceneView.pause();
@@ -223,7 +184,6 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(this::onLocationChanged);
         if (session != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             session.close();
@@ -234,7 +194,6 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), this::onLocationChanged);
         if (arSceneView != null) {
             try {
                 arSceneView.resume();
@@ -249,10 +208,11 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
                 session.resume();
             } catch (CameraNotAvailableException e) {
                 e.printStackTrace();
-                Log.e("ARCore", "Errore durante la ripresa della sessione", e);}
+                Log.e("ARCore", "Errore durante la ripresa della sessione", e);
+            }
         }
     }
-
+/*
     @Override
     public void onLocationChanged(@NonNull Location location) {
         //rendering
@@ -261,5 +221,23 @@ public class ArFragmentIndoor extends Fragment implements LocationListener{
             arSceneView.getScene().removeChild(childNode);
         }
         created = false;
+    }*/
+
+    public void startQrCodeScanner() {
+        ScanOptions options = new ScanOptions();
+        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+        options.setCaptureActivity(CaptureActivity.class);
+        options.setPrompt("Scan a QR code");
+        options.setCameraId(0);
+        options.setBeepEnabled(false);
+        barcodeLauncher.launch(options);
+    }
+
+    private Oggetto3D handleQRCode(String qrCodeData) {
+        int id = Integer.parseInt(qrCodeData.split("-")[0]);
+        for(Oggetto3D o : oggetti)
+            if(o.getId() == id)
+                return o;
+        return null;
     }
 }

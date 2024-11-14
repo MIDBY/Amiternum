@@ -34,4 +34,6 @@
     <string name="cancelSettingAlert">Rifiuta</string>
     <string name="enableGPSRequest">Il GPS è disattivato, attivalo per continuare</string>
     <string name="authRequestText">Autorizzazione necessaria</string>
+    <string name="scan">Scansiona QR code</string>
+    <string name="myPosition">Sono qui!</string>
 </resources>

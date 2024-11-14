@@ -6,17 +6,29 @@ import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.aspose.threed.FileFormat;
+import com.aspose.threed.GltfSaveOptions;
+import com.aspose.threed.Material;
+import com.aspose.threed.Scene;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import it.univaq.amiternum.Database.DB;
-import it.univaq.amiternum.MainActivity;
 import it.univaq.amiternum.Model.Oggetto3D;
 import it.univaq.amiternum.Model.Punto;
 import it.univaq.amiternum.R;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GetData {
 

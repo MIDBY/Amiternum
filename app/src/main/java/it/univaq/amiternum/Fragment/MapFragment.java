@@ -148,10 +148,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        userLocation = location;
         if (map == null){
             return;
         }
+        userLocation = location;
+        if (myMarker == null) {
+            MarkerOptions options = new MarkerOptions();
+            options.title(getString(R.string.myPosition));
+            options.position(new LatLng(location.getLatitude(), location.getLongitude()));
+            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f);
+            myMarker = map.addMarker(options);
+        } else {
+            myMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+
         if(userLocation.hasAltitude()){
             String text =   getString(R.string.latitudeText)+ " " + userLocation.getLatitude() + "°\n" +
                             getString(R.string.longitudeText)+ " " + userLocation.getLongitude() + "°\n" +
@@ -178,28 +188,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         locationHelper.start(requireContext(),this::onLocationChanged);
-        mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
         map = googleMap;
+        mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
         UiSettings mapSettings;
         mapSettings = map.getUiSettings();
         mapSettings.setZoomControlsEnabled(true);
         mapSettings.setScrollGesturesEnabled(true);
         mapSettings.setTiltGesturesEnabled(true);
         mapSettings.setMyLocationButtonEnabled(true);
-
-        if (myMarker == null) {
-            requireActivity().runOnUiThread(()->{
-                myMarker = map.addMarker(new MarkerOptions()
-                        .position(new LatLng(0, 0))
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f));
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0,0),0f));
-            });
-        } else {
-            LatLng lng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-            requireActivity().runOnUiThread(()-> myMarker = map.addMarker(new MarkerOptions()
-                    .position(lng)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f)));
-        }
 
         if (punti != null) {
             for (Punto p : punti) {

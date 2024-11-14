@@ -41,6 +41,6 @@
         <activity android:name=".MainActivity" android:exported="true" />
         <activity android:name=".IndoorActivity" android:exported="true" />
         <activity android:name=".OutdoorActivity" android:exported="true" />
-
+        <activity android:name="com.journeyapps.barcodescanner.CaptureActivity" android:exported="true" android:screenOrientation="portrait" tools:replace="screenOrientation"/>
     </application>
 </manifest>

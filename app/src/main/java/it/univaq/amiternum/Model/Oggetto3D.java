@@ -104,6 +104,33 @@ public class Oggetto3D implements Serializable {
         return null;
     }
 
+    public String getObjUrlFile() {
+        List<String> files = getUrlFilesAsList();
+        for(String s : files) {
+            if(s.endsWith(".obj"))
+                return s;
+        }
+        return null;
+    }
+
+    public String getMtlUrlFile() {
+        List<String> files = getUrlFilesAsList();
+        for(String s : files) {
+            if(s.endsWith(".mtl"))
+                return s;
+        }
+        return null;
+    }
+
+    public String[] getImgUrlFiles() {
+        List<String> files = getUrlFilesAsList();
+
+        String[] result = files.stream()
+            .filter(s -> !s.endsWith(".obj") && !s.endsWith(".mtl"))
+            .toArray(String[]::new);
+        return result;
+    }
+
     public void setUrlFiles(String urlFiles) {
         this.urlFiles = urlFiles;
     }

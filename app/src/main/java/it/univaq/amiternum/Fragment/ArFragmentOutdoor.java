@@ -45,6 +45,7 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ArFragmentOutdoor extends Fragment implements LocationListener{
 
@@ -56,7 +57,6 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
     private ArSceneView arSceneView;
     private Session session;
     private ArrayList<Punto> punti = new ArrayList<>();
-    private ArrayList<Oggetto3D> oggetti = new ArrayList<>();
     boolean created = false;
 
     private final ActivityResultLauncher<String> launcher = registerForActivityResult (
@@ -77,7 +77,6 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
             new ActivityResultContracts.RequestPermission(), result -> { if(!result)Toast.makeText(requireContext(), getString(R.string.authRequestText),Toast.LENGTH_SHORT).show(); }
     );
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -88,6 +87,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
+        view.findViewById(R.id.launchScanner).setVisibility(View.GONE);
 
         if (!CameraHelper.checkCameraPermission(requireContext())){
             CameraHelper.permission(requireContext(), launcherCamera);
@@ -109,12 +109,8 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
 
         if(Pref.load(requireContext(),"firstAccess",true)){
             punti = GetData.downloadPunto(requireContext());
-            oggetti = GetData.downloadOggetto(requireContext());
         } else {
             new Thread(() -> punti = (ArrayList<Punto>) DB.getInstance(requireContext()).getPuntoDao().findAll()).start();
-            //punti = GetData.loadPunto(requireContext());
-            new Thread(() -> oggetti = (ArrayList<Oggetto3D>) DB.getInstance(requireContext()).getOggettoDao().findAll()).start();
-            //oggetti = GetData.loadOggetto(requireContext());
         }
     }
 
@@ -135,7 +131,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
             //CREAZIONE NODO ORIGINE
             double originLatitude = session.getEarth().getCameraGeospatialPose().getLatitude();
             double originLongitude = session.getEarth().getCameraGeospatialPose().getLongitude();
-            double originAltitude = session.getEarth().getCameraGeospatialPose().getAltitude();
+            double originAltitude = Math.max(0, session.getEarth().getCameraGeospatialPose().getAltitude());
 
             Anchor originAnchor = session.getEarth().createAnchor(originLatitude,originLongitude,originAltitude,0f,0f,0f,1f);
             AnchorNode originAnchorNode = new AnchorNode(originAnchor);
@@ -167,14 +163,19 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
                             Vector3 direction = Vector3.subtract(textViewNodeCycle.getWorldPosition(),
                                     new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
                             Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
-                            Quaternion finalRotation = Quaternion.multiply(quaternion.inverted(), lookRotation);
+                            Quaternion finalRotation = Quaternion.multiply(lookRotation, quaternion.inverted());
                             textViewNodeCycle.setWorldRotation(finalRotation);
                             AnchorNode anchorNodeCycle = new AnchorNode(anchorCycle);
                             anchorNodeCycle.addChild(textViewNodeCycle);
                             originAnchorNode.addChild(anchorNodeCycle);
+                            Log.i("My position", "Device Rotation: " + Arrays.toString(deviceRotation));
+                            Log.i("My position","Quaternion: " + quaternion);
+                            Log.i("My position","Direction: " + direction);
+                            Log.i("My position","Look Rotation: " + lookRotation);
+                            Log.i("My position","Final Rotation: " + finalRotation);
                         });
-                    created = true;
                 }
+                created = true;
             }
         }
     }

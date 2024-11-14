@@ -33,8 +33,8 @@ public class LocationHelper {
             showSettingAlert(context);
         }
         if (checkCoarse == PackageManager.PERMISSION_GRANTED && checkFine==PackageManager.PERMISSION_GRANTED){
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10000,10, listener);
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,10000,10, listener);
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5, listener);
+            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,5000,5, listener);
         } else {
             launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }

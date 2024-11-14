@@ -27,6 +27,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'lwjgl.dll.sha1'
+        exclude 'lwjgl32.dll.sha1'
+    }
 }
 
 dependencies {
@@ -34,6 +39,9 @@ dependencies {
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.17.1'
     implementation 'com.google.ar.sceneform:core:1.17.1'
     implementation 'com.google.ar.sceneform:assets:1.17.1'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.4.1'
+    implementation 'com.aspose:aspose-3d:24.9.0'
 
     implementation libs.appcompat
     implementation libs.material
@@ -57,6 +65,4 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.2.0'
     implementation 'com.google.maps.android:maps-utils-ktx:5.0.0'
 
-    //TEST
-    implementation 'de.javagl:obj:0.2.1'
 }

@@ -10,6 +10,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         jcenter()
+        maven {
+            url "https://releases.aspose.com/java/repo/"
+        }
     }
 }
 dependencyResolutionManagement {
@@ -17,6 +20,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://releases.aspose.com/java/repo/"
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import java.net.URL;
 
 public class InternetRequest {
 
-    //USO HTTP URL CONNECTION json-server --host 192.168.18.203 punti1
+    //USO HTTP URL CONNECTION github-server pointDataset
     public static void asyncRequestPunto(OnRequest listener){
         new Thread(()->{
             String data = doRequest("GET", "https://MIDBY.github.io/Amiternum-project/pointDataset.json", listener);
