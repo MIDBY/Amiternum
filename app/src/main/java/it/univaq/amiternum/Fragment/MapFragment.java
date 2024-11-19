@@ -81,12 +81,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        int finePermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION);
-        int coarsePermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION);
-        if(finePermission == PackageManager.PERMISSION_DENIED || coarsePermission == PackageManager.PERMISSION_DENIED) {
-            launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
+        locationHelper.start(requireContext(), this::onLocationChanged);
 
         SupportMapFragment fragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTestFragment);
         textView = view.findViewById(R.id.textView);
@@ -94,7 +89,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         mSensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
         mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-        locationHelper.start(requireContext(), this::onLocationChanged);
         if(fragment != null) {
             fragment.getMapAsync(this);
         }
@@ -226,7 +220,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onPause() {
         super.onPause();
+        locationHelper.stop(this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
         locationHelper.stop(this::onLocationChanged);
     }
 }

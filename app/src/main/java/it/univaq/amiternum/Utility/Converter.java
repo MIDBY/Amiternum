@@ -5,58 +5,65 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import it.univaq.amiternum.Model.Oggetto3D;
+
 public class Converter {
 
-    public static void convertToGltf(String objUrl, String mtlUrl, String[] textureUrls, ConversionCallback callback) {
+    public static void convertToGltf(Oggetto3D oggetto, ConversionCallback callback) {
         new Thread(() -> {
             try {
                 // Download the .obj file
-                byte[] objData = downloadFile(objUrl);
-                byte[] mtlData = downloadFile(mtlUrl);
-                byte[][] textureData = new byte[textureUrls.length][];
+                ObjLoadOptions options = new ObjLoadOptions();
+                options.setEnableMaterials(true);
+                //.setFlipCoordinateSystem(true);
+                Scene scene = new Scene();
+                try (InputStream inputStream = getInputStreamFile(oggetto.getObjUrlFile())) {
+                    scene = Scene.fromStream(inputStream, options);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                /*
+                byte[] mtlData = downloadFile(oggetto.getMtlUrlFile());
 
                 // Download each texture file
+                String[] textureUrls = oggetto.getImgUrlFiles();
+                byte[][] textureData = new byte[textureUrls.length][];
                 for (int i = 0; i < textureUrls.length; i++) {
                     textureData[i] = downloadFile(textureUrls[i]);
                 }
-
+*/
                 // Create a temporary directory to store the files
                 File tempDir = new File(System.getProperty("java.io.tmpdir"), "aspose_temp");
                 if (!tempDir.exists()) {
                     tempDir.mkdir();
                 }
-
+/*
                 // Save the downloaded files to temporary files
-                File objFile = new File(tempDir, "model.obj");
-                File mtlFile = new File(tempDir, "model.mtl");
-                writeToFile(objFile, objData);
+                File mtlFile = new File(urlFileName(oggetto.getMtlUrlFile()));
                 writeToFile(mtlFile, mtlData);
 
                 // Save texture files
                 for (int i = 0; i < textureData.length; i++) {
-                    File textureFile = new File(tempDir, "texture" + i + ".jpeg");
+                    File textureFile = new File(urlFileName(textureUrls[i]));
                     writeToFile(textureFile, textureData[i]);
                 }
-
-                // Load the scene from the .obj file
-                Scene scene = new Scene();
-                scene.open(objFile.getPath());
-
+                options.getLookupPaths().add(mtlFile.getPath());
+*/
                 // Prepare GLTF save options
-                GltfSaveOptions saveOptions = new GltfSaveOptions(FileFormat.GLTF);
+                GltfSaveOptions saveOptions = new GltfSaveOptions(FileFormat.GLTF2);
                 saveOptions.setEmbedAssets(true);  // Embed textures directly in GLTF
-                saveOptions.setPrettyPrint(true);    // Readable JSON output
 
                 // Generate output filename
-                String outputPath = tempDir.getAbsolutePath() + File.separator + "model.gltf";
-
-                // Save the scene as GLTF
-                scene.save(outputPath, saveOptions);
-
+                //String outputPath = tempDir.getAbsolutePath() + File.separator + "model.gltf";
+                byte[] gltfData;
+                try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+                    scene.save(stream, saveOptions);
+                    gltfData = stream.toByteArray();
+                }
                 // Clean up temporary files
-                deleteDirectory(tempDir);
-
-                callback.onConversionComplete(outputPath);
+                //deleteDirectory(tempDir);
+                if(gltfData != null)
+                    callback.onConversionComplete(gltfData);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,6 +91,18 @@ public class Converter {
         }
     }
 
+    private static InputStream getInputStreamFile(String fileUrl) throws IOException {
+        URL url = new URL(fileUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setDoOutput(true);
+        connection.connect();
+        if(connection.getResponseCode() != HttpURLConnection.HTTP_OK)
+            throw new IOException("Http error code: " + connection.getResponseMessage());
+        else
+            return connection.getInputStream();
+    }
+
     // Method to write byte array to a file
     private static void writeToFile(File file, byte[] data) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -102,5 +121,10 @@ public class Converter {
             }
         }
         directory.delete();
+    }
+
+    private static String urlFileName(String url) {
+        String[] splitted = url.split("/");
+        return splitted[splitted.length -1];
     }
 }

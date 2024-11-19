@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Amiternum</string>
-    <string name="app_subtitle">La storia</string>
-    <string name="app_subtitle2">nel mondo moderno</string>
+    <string name="app_subtitle">La nostra storia</string>
+    <string name="app_subtitle2">con gli occhi del futuro</string>
+    <string name="app_subtitle3">Powered by:</string>
     <string name="icon">icona</string>
     <string name="app_test">APP TEST</string>
     <string name="start">Start</string>

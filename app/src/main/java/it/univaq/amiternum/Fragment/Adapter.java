@@ -9,7 +9,9 @@ import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -29,7 +31,7 @@ import it.univaq.amiternum.R;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
-    private List<Oggetto3D> oggetti;
+    private final List<Oggetto3D> oggetti;
 
     public Adapter(List<Oggetto3D> oggetti) {
         this.oggetti = oggetti;
@@ -56,13 +58,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         private final TextView title;
         private final ImageView image;
 
-        private TextView playerPosition, playerDuration;
-        private SeekBar seekBar;
-        private ImageView btRew, btPlay, btPause, btFw;
+        private TextView playerPosition, playerPosition2;
+        private SeekBar seekBar, seekBar2;
+        private ImageView btPlay, btPlay2;
+        private ImageView btPause, btPause2;
 
         private MediaPlayer mediaPlayer;
-        private Handler handler = new Handler();
-        private Runnable runnable;
+        private final Handler handler = new Handler();
+        private Runnable runnable, runnable2;
 
 
         public ViewHolder(@NonNull View view) {
@@ -87,12 +90,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             ((TextView) artwork.findViewById(R.id.artworkVideoResource)).setText(R.string.videoResourceText);
 
             playerPosition = artwork.findViewById(R.id.player_position);
-            playerDuration = artwork.findViewById(R.id.player_duration);
+            TextView playerDuration = artwork.findViewById(R.id.player_duration);
             seekBar = artwork.findViewById(R.id.seek_bar);
-            btRew = artwork.findViewById(R.id.bt_rew);
+            ImageView btRew = artwork.findViewById(R.id.bt_rew);
             btPlay = artwork.findViewById(R.id.bt_play);
             btPause = artwork.findViewById(R.id.bt_pause);
-            btFw = artwork.findViewById(R.id.bt_fw);
+            ImageView btFw = artwork.findViewById(R.id.bt_fw);
 
             if(!oggetto.getUrlAudio().isEmpty()) {
                 Uri uri = Uri.parse(oggetto.getUrlAudio());
@@ -149,14 +152,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     }
 
                     @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-
-                    }
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
 
                     @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                    }
+                    public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
                 mediaPlayer.setOnCompletionListener(mediaPlayer -> {
                     btPause.setVisibility(View.GONE);
@@ -167,12 +166,88 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 artwork.findViewById(R.id.audioLayout).setVisibility(View.GONE);
             }
 
+            playerPosition2 = artwork.findViewById(R.id.player_position2);
+            TextView playerDuration2 = artwork.findViewById(R.id.player_duration2);
+            seekBar2 = artwork.findViewById(R.id.seek_bar2);
+            ImageView btRew2 = artwork.findViewById(R.id.bt_rew2);
+            btPlay2 = artwork.findViewById(R.id.bt_play2);
+            btPause2 = artwork.findViewById(R.id.bt_pause2);
+            ImageView btFw2 = artwork.findViewById(R.id.bt_fw2);
+
             if(!oggetto.getUrlVideo().isEmpty()) {
                 VideoView video = artwork.findViewById(R.id.videoView);
-                video.setVideoPath(oggetto.getUrlVideo());
-                MediaController mediaController = new MediaController(video.getContext());
-                video.setMediaController(mediaController);
-                mediaController.setAnchorView(video);
+                video.setVideoURI(Uri.parse(oggetto.getUrlVideo()));
+                runnable2 = () -> {
+                    if(video.isPlaying()) {
+                        seekBar2.setProgress(video.getCurrentPosition());
+                        playerPosition2.setText(convertFormat(video.getCurrentPosition()));
+                        seekBar2.postDelayed(runnable2, 500);
+                    }
+                };
+                playerPosition2.setText(R.string.playerZero);
+                btPlay2.setOnClickListener(view1 -> {
+                    btPlay2.setVisibility(View.GONE);
+                    btPause2.setVisibility(View.VISIBLE);
+                    seekBar2.setMax(video.getDuration());
+                    video.start();
+                    video.postDelayed(runnable2, 0);
+                });
+                btPause2.setOnClickListener(view1 -> {
+                    btPlay2.setVisibility(View.VISIBLE);
+                    btPause2.setVisibility(View.GONE);
+                    video.pause();
+                    video.removeCallbacks(runnable2);
+                });
+                btFw2.setOnClickListener(view1 -> {
+                    int currentPosition = video.getCurrentPosition();
+                    int fwDuration = video.getDuration();
+                    if (fwDuration != currentPosition) {
+                        currentPosition = Math.min(currentPosition + 5000, fwDuration);
+                        playerPosition2.setText(convertFormat(currentPosition));
+                        video.seekTo(currentPosition);
+                        seekBar2.postDelayed(() -> seekBar2.setProgress(video.getCurrentPosition()), 100);
+                    }
+                });
+                btRew2.setOnClickListener(view1 -> {
+                    int currentPosition = video.getCurrentPosition();
+                    if (currentPosition > 5000)
+                        currentPosition = currentPosition - 5000;
+                    else
+                        currentPosition = 0;
+                    playerPosition2.setText(convertFormat(currentPosition));
+                    video.seekTo(currentPosition);
+                    seekBar2.postDelayed(() -> seekBar2.setProgress(video.getCurrentPosition()), 100);
+                });
+                video.setOnPreparedListener(mediaPlayer1 -> {
+                    playerDuration2.setText(convertFormat(video.getDuration()));
+                    seekBar2.postDelayed(runnable2, 0);
+                });
+                seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (fromUser)
+                            video.seekTo(progress);
+                        playerPosition2.setText(convertFormat(video.getCurrentPosition()));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        video.pause();
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        if(btPause2.getVisibility() == View.VISIBLE)
+                            video.start();
+                    }
+                });
+                video.setOnCompletionListener(mediaPlayer -> {
+                    btPause2.setVisibility(View.GONE);
+                    btPlay2.setVisibility(View.VISIBLE);
+                    video.seekTo(0);
+                    seekBar2.setProgress(0);
+                });
+
             } else {
                 artwork.findViewById(R.id.artworkVideoResource).setVisibility(View.GONE);
                 artwork.findViewById(R.id.videoView).setVisibility(View.GONE);

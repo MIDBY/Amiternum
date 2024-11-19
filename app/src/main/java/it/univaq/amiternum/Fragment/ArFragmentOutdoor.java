@@ -1,5 +1,6 @@
 package it.univaq.amiternum.Fragment;
 
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,13 +12,15 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import it.univaq.amiternum.Database.DB;
-import it.univaq.amiternum.Model.Oggetto3D;
+import android.Manifest;
 import it.univaq.amiternum.Model.Punto;
 import it.univaq.amiternum.R;
 import it.univaq.amiternum.Utility.GetData;
@@ -45,14 +48,8 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class ArFragmentOutdoor extends Fragment implements LocationListener{
-
-    //TODO: Scegliere QRCode o riconoscimento immagini?
-    //          -QrCode tramite libreria zxing, inserendo un'activity tra mainActivity e IndoorActivity
-    //          -Riconoscitore immagine tramite AugmentedImageDatabase nel sito ufficiale https://developers.google.com/ar/develop/java/augmented-images/guide?hl=it
-    //TODO: Video nel mainActivity non mostra la barra dei controlli sul cellulare
+public class ArFragmentOutdoor extends Fragment implements LocationListener {
 
     private ArSceneView arSceneView;
     private Session session;
@@ -66,15 +63,23 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
                 public void onActivityResult(Boolean result) {
                     if(result){
                         locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
+                        if(CameraHelper.checkGeospatialArCorePermissions(requireContext()) && session == null)
+                            startArCoreSession();
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.authRequestText), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
     );
-    private final LocationHelper locationHelper = new LocationHelper(launcher);
+    private LocationHelper locationHelper;
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), result -> { if(!result)Toast.makeText(requireContext(), getString(R.string.authRequestText),Toast.LENGTH_SHORT).show(); }
+            new ActivityResultContracts.RequestPermission(), result -> {
+                if(!result) {
+                    Toast.makeText(requireContext(), getString(R.string.authRequestText), Toast.LENGTH_SHORT).show();
+                } else
+                    if(CameraHelper.checkGeospatialArCorePermissions(requireContext()) && session == null)
+                        startArCoreSession();
+            }
     );
 
     @Nullable
@@ -86,32 +91,20 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        locationHelper = new LocationHelper(launcher);
+        if (CameraHelper.checkCameraPermission(requireContext())) {
+            if (CameraHelper.checkGeospatialArCorePermissions(requireContext()))
+                startArCoreSession();
+        } else
+            launcherCamera.launch(Manifest.permission.CAMERA);
+
         arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
         view.findViewById(R.id.launchScanner).setVisibility(View.GONE);
 
-        if (!CameraHelper.checkCameraPermission(requireContext())){
-            CameraHelper.permission(requireContext(), launcherCamera);
-        }
-
-        locationHelper.start(requireContext(), this::onLocationChanged);
-        try {
-            session = new Session(requireContext());
-            Config config = new Config(session);
-            config.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
-            config.setGeospatialMode(Config.GeospatialMode.ENABLED);
-            session.configure(config);
-            arSceneView.setupSession(session);
-        } catch (UnavailableArcoreNotInstalledException | UnavailableApkTooOldException |
-                 UnavailableSdkTooOldException | UnavailableDeviceNotCompatibleException e) {
-            e.printStackTrace();
-            Log.d("ARSession", "Problema nella creazione della sessione");
-        }
-
-        if(Pref.load(requireContext(),"firstAccess",true)){
+        if(Pref.load(requireContext(),"firstAccess",true))
             punti = GetData.downloadPunto(requireContext());
-        } else {
+        else
             new Thread(() -> punti = (ArrayList<Punto>) DB.getInstance(requireContext()).getPuntoDao().findAll()).start();
-        }
     }
 
     private void onUpdateFrame(FrameTime frameTime) {
@@ -162,17 +155,12 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
                             Quaternion quaternion = new Quaternion(deviceRotation[0], deviceRotation[1], deviceRotation[2], deviceRotation[3]);
                             Vector3 direction = Vector3.subtract(textViewNodeCycle.getWorldPosition(),
                                     new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
-                            Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
+                            Quaternion lookRotation = Quaternion.lookRotation(Vector3.up(), direction);
                             Quaternion finalRotation = Quaternion.multiply(lookRotation, quaternion.inverted());
                             textViewNodeCycle.setWorldRotation(finalRotation);
                             AnchorNode anchorNodeCycle = new AnchorNode(anchorCycle);
                             anchorNodeCycle.addChild(textViewNodeCycle);
                             originAnchorNode.addChild(anchorNodeCycle);
-                            Log.i("My position", "Device Rotation: " + Arrays.toString(deviceRotation));
-                            Log.i("My position","Quaternion: " + quaternion);
-                            Log.i("My position","Direction: " + direction);
-                            Log.i("My position","Look Rotation: " + lookRotation);
-                            Log.i("My position","Final Rotation: " + finalRotation);
                         });
                 }
                 created = true;
@@ -228,11 +216,25 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener{
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        //rendering
         for (int j = arSceneView.getScene().getChildren().size()-1; j>=1 ; j--) {
             Node childNode = arSceneView.getScene().getChildren().get(j);
             arSceneView.getScene().removeChild(childNode);
         }
         created = false;
+    }
+
+    private void startArCoreSession() {
+        try {
+            session = new Session(getContext());
+            Config config = new Config(session);
+            config.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
+            config.setGeospatialMode(Config.GeospatialMode.ENABLED);
+            session.configure(config);
+            arSceneView.setupSession(session);
+        } catch (UnavailableArcoreNotInstalledException | UnavailableApkTooOldException |
+                 UnavailableSdkTooOldException | UnavailableDeviceNotCompatibleException e) {
+            e.printStackTrace();
+            Log.d("ARSession", "Problema nella creazione della sessione");
+        }
     }
 }
