@@ -5,7 +5,6 @@ import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +14,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -24,21 +22,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.ar.core.Anchor;
-import com.google.ar.core.Config;
-import com.google.ar.core.Frame;
-import com.google.ar.core.Session;
-import com.google.ar.core.TrackingState;
-import com.google.ar.core.exceptions.CameraNotAvailableException;
-import com.google.ar.core.exceptions.UnavailableApkTooOldException;
-import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
-import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
-import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.ArSceneView;
-import com.google.ar.sceneform.FrameTime;
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.assets.RenderableSource;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
@@ -55,15 +40,12 @@ import it.univaq.amiternum.Utility.Converter;
 import it.univaq.amiternum.Utility.GetData;
 import it.univaq.amiternum.Utility.Pref;
 import it.univaq.amiternum.helpers.CameraHelper;
-import it.univaq.amiternum.helpers.LocationHelper;
 
 public class ArFragmentIndoor extends Fragment {
 
     private ArFragment arFragment;
-    private Session session;
     private ArrayList<Oggetto3D> oggetti = new ArrayList<>();
     private Oggetto3D oggetto;
-    boolean created = false;
     private AlertDialog dialog;
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
@@ -102,8 +84,13 @@ public class ArFragmentIndoor extends Fragment {
         if (!CameraHelper.checkCameraPermission(requireContext()))
             launcherCamera.launch(Manifest.permission.CAMERA);
 
-        arFragment = (ArFragment) getChildFragmentManager().findFragmentById(R.id.ar_scene_viewFragment);
-        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> placeModel(hitResult.createAnchor())));
+        arFragment = (ArFragment) getChildFragmentManager().findFragmentById(R.id.ar_fragment);
+        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
+            if (oggetto != null && !oggetto.getResourcePath().isEmpty())
+                placeModel(hitResult.createAnchor());
+            else
+                Toast.makeText(requireContext(), "Scansiona un qr code del museo per continuare",Toast.LENGTH_SHORT).show();
+        }));
 
         view.findViewById(R.id.launchScanner).setOnClickListener(v -> startQrCodeScanner());
     }
@@ -139,7 +126,6 @@ public class ArFragmentIndoor extends Fragment {
         super.onDestroy();
         arFragment.onDestroy();
     }
-
 
     @Override
     public void onResume() {

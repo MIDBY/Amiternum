@@ -53,6 +53,7 @@ public class ListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ((TextView) view.findViewById(R.id.titleHomepage)).setText(R.string.subtitle);
         recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
         }
@@ -111,7 +112,6 @@ public class ListFragment extends Fragment {
                     recyclerView.post(adapter::notifyDataSetChanged);
                 }).start();
             }
-            recyclerView.setAdapter(adapter);
         }
     }
 

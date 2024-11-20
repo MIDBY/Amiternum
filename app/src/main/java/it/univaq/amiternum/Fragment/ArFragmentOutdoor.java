@@ -83,21 +83,19 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_outdoor,container,false);
+        return inflater.inflate(R.layout.ar_fragment_outdoor,container,false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
+        locationHelper.start(requireContext(), this::onLocationChanged);
         arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
         if (CameraHelper.checkCameraPermission(requireContext())) {
             if (CameraHelper.checkGeospatialArCorePermissions(requireContext()))
                 startArCoreSession();
         } else
             launcherCamera.launch(Manifest.permission.CAMERA);
-
-        view.findViewById(R.id.launchScanner).setVisibility(View.GONE);
 
         if(Pref.load(requireContext(),"firstAccess",true))
             punti = GetData.downloadPunto(requireContext());
@@ -169,7 +167,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
+        locationHelper.stop(this::onLocationChanged);
         if (arSceneView != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             arSceneView.pause();
@@ -182,7 +180,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
+        locationHelper.stop(this::onLocationChanged);
         if (session != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             session.close();
@@ -193,7 +191,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
+        locationHelper.start(requireContext(), this::onLocationChanged);
         if (arSceneView != null) {
             try {
                 arSceneView.resume();

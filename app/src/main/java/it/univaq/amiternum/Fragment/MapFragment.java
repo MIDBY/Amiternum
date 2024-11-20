@@ -1,8 +1,6 @@
 package it.univaq.amiternum.Fragment;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,7 +19,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import it.univaq.amiternum.Database.DB;
@@ -33,7 +30,6 @@ import it.univaq.amiternum.helpers.LocationHelper;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -81,7 +77,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
+        locationHelper.start(requireContext(), this::onLocationChanged);
 
         SupportMapFragment fragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTestFragment);
         textView = view.findViewById(R.id.textView);
@@ -125,7 +121,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR && myMarker!=null) {
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR && myMarker != null) {
             float[] rotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(rotationMatrix, sensorEvent.values);
 
@@ -181,7 +177,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
+        locationHelper.start(requireContext(), this::onLocationChanged);
         map = googleMap;
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -206,27 +202,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(MapFragment.this::onLocationChanged);
+        locationHelper.stop(this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
+        locationHelper.start(requireContext(), this::onLocationChanged);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(MapFragment.this::onLocationChanged);
+        locationHelper.stop(this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        locationHelper.stop(MapFragment.this::onLocationChanged);
+        locationHelper.stop(this::onLocationChanged);
     }
 }
