@@ -81,7 +81,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
 
         SupportMapFragment fragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTestFragment);
         textView = view.findViewById(R.id.textView);
@@ -181,7 +181,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        locationHelper.start(requireContext(),this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
         map = googleMap;
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -206,27 +206,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(),this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
     }
 }

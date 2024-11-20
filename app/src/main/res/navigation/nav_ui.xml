@@ -21,7 +21,7 @@
         android:id="@+id/navIndoor"
         android:name="it.univaq.amiternum.Fragment.ArFragmentIndoor"
         android:label="ArFragment"
-        tools:layout="@layout/ar_fragment">
+        tools:layout="@layout/activity_indoor">
         <action
             android:id="@+id/action_navIndoor_to_navHome"
             app:destination="@id/navHome" />

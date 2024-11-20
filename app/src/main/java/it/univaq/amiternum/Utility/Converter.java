@@ -1,5 +1,8 @@
 package it.univaq.amiternum.Utility;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import com.aspose.threed.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -15,7 +18,6 @@ public class Converter {
                 // Download the .obj file
                 ObjLoadOptions options = new ObjLoadOptions();
                 options.setEnableMaterials(true);
-                //.setFlipCoordinateSystem(true);
                 Scene scene = new Scene();
                 try (InputStream inputStream = getInputStreamFile(oggetto.getObjUrlFile())) {
                     scene = Scene.fromStream(inputStream, options);
@@ -72,24 +74,6 @@ public class Converter {
         }).start();
     }
 
-    // Method to download a file from a URL
-    private static byte[] downloadFile(String fileUrl) throws IOException {
-        URL url = new URL(fileUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setDoOutput(true);
-        connection.connect();
-
-        try (InputStream inputStream = connection.getInputStream();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-            return outputStream.toByteArray();
-        }
-    }
 
     private static InputStream getInputStreamFile(String fileUrl) throws IOException {
         URL url = new URL(fileUrl);
@@ -123,8 +107,34 @@ public class Converter {
         directory.delete();
     }
 
-    private static String urlFileName(String url) {
-        String[] splitted = url.split("/");
-        return splitted[splitted.length -1];
+    public static void downloadResource(Context context, Oggetto3D oggetto) {
+        Converter.convertToGltf(oggetto, new ConversionCallback() {
+            @Override
+            public void onConversionComplete(byte[] outputData) {
+                File path = context.getFilesDir();
+                String filename = getFileName(oggetto.getObjUrlFile()) + ".gltf";
+                try {
+                    FileOutputStream writer = new FileOutputStream(new File(path, filename));
+                    writer.write(outputData);
+                    writer.close();
+                    oggetto.setResourcePath(path + filename);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void onConversionFailed() {
+                Toast.makeText(context, "Errore nel caricamento dell'oggetto " + getFileName(oggetto.getObjUrlFile()), Toast.LENGTH_LONG).show();
+            }
+
+            private String getFileName(String url) {
+                String[] splitted = url.split("/");
+                return splitted[splitted.length - 1];
+            }
+        });
     }
+
+
+
 }

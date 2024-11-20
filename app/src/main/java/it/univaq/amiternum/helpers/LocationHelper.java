@@ -29,6 +29,10 @@ public class LocationHelper {
         if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             showSettingAlert(context);
         }
+        if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
+
         if(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5, listener);
@@ -47,10 +51,8 @@ public class LocationHelper {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.titleSettingAlert))
                 .setMessage(context.getString(R.string.messageSettingAlert))
-                .setPositiveButton(context.getString(R.string.okSettingAlert), (dialogInterface, i) -> { context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); alertDialog.dismiss(); })
-                .setNegativeButton(context.getString(R.string.cancelSettingAlert), (dialogInterface, i) -> {
-            alertDialog.setMessage(context.getString(R.string.enableGPSRequest));
-        });
+                .setPositiveButton(context.getString(R.string.okSettingAlert), (dialogInterface, i) -> { alertDialog.dismiss(); context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); })
+                .setNegativeButton(context.getString(R.string.cancelSettingAlert), (dialogInterface, i) -> alertDialog.setMessage(context.getString(R.string.enableGPSRequest)));
         alertDialog = builder.create();
         alertDialog.show();
     }

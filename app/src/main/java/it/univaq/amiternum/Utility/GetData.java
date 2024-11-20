@@ -119,6 +119,7 @@ public class GetData {
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject item = array.getJSONObject(i);
                         Oggetto3D oggetto = Oggetto3D.parseJson(item);
+                        Converter.downloadResource(context.getApplicationContext(), oggetto);
                         oggetti.add(oggetto);
                     }
                 } catch (JSONException e) {

@@ -12,11 +12,9 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import it.univaq.amiternum.Database.DB;
@@ -71,7 +69,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                 }
             }
     );
-    private LocationHelper locationHelper;
+    private LocationHelper locationHelper = new LocationHelper(launcher);
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
                 if(!result) {
@@ -85,20 +83,20 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.ar_fragment,container,false);
+        return inflater.inflate(R.layout.activity_outdoor,container,false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper = new LocationHelper(launcher);
+        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
+        arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
         if (CameraHelper.checkCameraPermission(requireContext())) {
             if (CameraHelper.checkGeospatialArCorePermissions(requireContext()))
                 startArCoreSession();
         } else
             launcherCamera.launch(Manifest.permission.CAMERA);
 
-        arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
         view.findViewById(R.id.launchScanner).setVisibility(View.GONE);
 
         if(Pref.load(requireContext(),"firstAccess",true))
@@ -171,7 +169,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
         if (arSceneView != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             arSceneView.pause();
@@ -184,7 +182,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
         if (session != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             session.close();
@@ -195,7 +193,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
         if (arSceneView != null) {
             try {
                 arSceneView.resume();
