@@ -33,8 +33,11 @@
     <string name="messageSettingAlert">Il GPS non è attivo. Vuoi andare nelle impostazioni di sistema?</string>
     <string name="okSettingAlert">Vai alle impostazioni</string>
     <string name="cancelSettingAlert">Rifiuta</string>
+    <string name="dimissSettingAlert">Non mi importa</string>
     <string name="enableGPSRequest">Il GPS è disattivato, attivalo per continuare</string>
     <string name="authRequestText">Autorizzazione necessaria</string>
+    <string name="errorModelLoad">Non riesco a caricare il modello</string>
     <string name="scan">Scansiona QR code</string>
     <string name="myPosition">Sono qui!</string>
+    <string name="waitingText">Ricevo l\'oggetto richiesto dalla galassia vicina</string>
 </resources>

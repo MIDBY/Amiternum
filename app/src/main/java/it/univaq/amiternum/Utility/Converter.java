@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import it.univaq.amiternum.Model.Oggetto3D;
-
+//TODO:elimina classe
 public class Converter {
 
     public static void convertToGltf(Oggetto3D oggetto, ConversionCallback callback) {
@@ -33,13 +33,7 @@ public class Converter {
                 for (int i = 0; i < textureUrls.length; i++) {
                     textureData[i] = downloadFile(textureUrls[i]);
                 }
-*/
-                // Create a temporary directory to store the files
-                File tempDir = new File(System.getProperty("java.io.tmpdir"), "aspose_temp");
-                if (!tempDir.exists()) {
-                    tempDir.mkdir();
-                }
-/*
+
                 // Save the downloaded files to temporary files
                 File mtlFile = new File(urlFileName(oggetto.getMtlUrlFile()));
                 writeToFile(mtlFile, mtlData);
@@ -112,12 +106,12 @@ public class Converter {
             @Override
             public void onConversionComplete(byte[] outputData) {
                 File path = context.getFilesDir();
-                String filename = getFileName(oggetto.getObjUrlFile()) + ".gltf";
+                String filename = oggetto.getFileName() + ".gltf";
                 try {
                     FileOutputStream writer = new FileOutputStream(new File(path, filename));
                     writer.write(outputData);
                     writer.close();
-                    oggetto.setResourcePath(path + filename);
+                    oggetto.setResourcePath(path + "/" + filename);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -125,12 +119,7 @@ public class Converter {
 
             @Override
             public void onConversionFailed() {
-                Toast.makeText(context, "Errore nel caricamento dell'oggetto " + getFileName(oggetto.getObjUrlFile()), Toast.LENGTH_LONG).show();
-            }
-
-            private String getFileName(String url) {
-                String[] splitted = url.split("/");
-                return splitted[splitted.length - 1];
+                Toast.makeText(context, "Errore nel caricamento dell'oggetto " + oggetto.getFileName(), Toast.LENGTH_LONG).show();
             }
         });
     }

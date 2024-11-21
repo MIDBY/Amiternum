@@ -1,6 +1,5 @@
 package it.univaq.amiternum.Fragment;
 
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +25,7 @@ import it.univaq.amiternum.Utility.Pref;
 import it.univaq.amiternum.helpers.CameraHelper;
 import it.univaq.amiternum.helpers.LocationHelper;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
@@ -69,7 +69,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                 }
             }
     );
-    private LocationHelper locationHelper = new LocationHelper(launcher);
+    private final LocationHelper locationHelper = new LocationHelper(launcher);
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
                 if(!result) {
@@ -89,7 +89,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
         arSceneView = view.findViewById(R.id.ar_scene_viewFragment);
         if (CameraHelper.checkCameraPermission(requireContext())) {
             if (CameraHelper.checkGeospatialArCorePermissions(requireContext()))
@@ -144,15 +144,18 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                             Pose worldPose = session.getEarth().getPose(latitude, longitude, altitudeCycle, 0f, 0f, 0f, 1f);
                             Anchor anchorCycle = session.createAnchor(worldPose);
                             Node textViewNodeCycle = new Node();
-                            float scaleFactor = 3f;
+                            float dist = distanceBetween(new LatLng(originLatitude, originLongitude), new LatLng(latitude, longitude));
+                            float scaleFactor = 0f;
+                            if(dist < 1000)
+                                scaleFactor = calculateScale(dist) / 10;
                             textViewNodeCycle.setRenderable(renderable);
                             textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
                             float[] deviceRotation = worldPose.getRotationQuaternion();
                             Quaternion quaternion = new Quaternion(deviceRotation[0], deviceRotation[1], deviceRotation[2], deviceRotation[3]);
                             Vector3 direction = Vector3.subtract(textViewNodeCycle.getWorldPosition(),
                                     new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
-                            Quaternion lookRotation = Quaternion.lookRotation(Vector3.up(), direction);
-                            Quaternion finalRotation = Quaternion.multiply(lookRotation, quaternion.inverted());
+                            Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
+                            Quaternion finalRotation = Quaternion.multiply(quaternion.inverted(), lookRotation);
                             textViewNodeCycle.setWorldRotation(finalRotation);
                             AnchorNode anchorNodeCycle = new AnchorNode(anchorCycle);
                             anchorNodeCycle.addChild(textViewNodeCycle);
@@ -164,10 +167,21 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
         }
     }
 
+    public static float distanceBetween(LatLng first, LatLng second) {
+        float[] distance = new float[1];
+        Location.distanceBetween(first.latitude, first.longitude, second.latitude, second.longitude, distance);
+        return Math.round(distance[0]);
+    }
+
+    private float calculateScale(float distance) {
+        float scale = distance * 2;
+        return (float) (16 - Math.log(scale) / Math.log(2.0));
+    }
+
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
         if (arSceneView != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             arSceneView.pause();
@@ -180,7 +194,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(ArFragmentOutdoor.this::onLocationChanged);
         if (session != null) {
             arSceneView.getScene().removeOnUpdateListener(this::onUpdateFrame);
             session.close();
@@ -191,13 +205,12 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
         if (arSceneView != null) {
             try {
                 arSceneView.resume();
                 arSceneView.getScene().addOnUpdateListener(this::onUpdateFrame);
             } catch (CameraNotAvailableException e) {
-                e.printStackTrace();
                 Log.e("ARCore", "Errore durante la ripresa della sessione, arSceneView", e);
             }
         }
@@ -205,7 +218,6 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
             try {
                 session.resume();
             } catch (CameraNotAvailableException e) {
-                e.printStackTrace();
                 Log.e("ARCore", "Errore durante la ripresa della sessione", e);}
         }
     }
@@ -229,7 +241,6 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
             arSceneView.setupSession(session);
         } catch (UnavailableArcoreNotInstalledException | UnavailableApkTooOldException |
                  UnavailableSdkTooOldException | UnavailableDeviceNotCompatibleException e) {
-            e.printStackTrace();
             Log.d("ARSession", "Problema nella creazione della sessione");
         }
     }

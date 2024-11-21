@@ -51,8 +51,18 @@ public class LocationHelper {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.titleSettingAlert))
                 .setMessage(context.getString(R.string.messageSettingAlert))
-                .setPositiveButton(context.getString(R.string.okSettingAlert), (dialogInterface, i) -> { alertDialog.dismiss(); context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); })
-                .setNegativeButton(context.getString(R.string.cancelSettingAlert), (dialogInterface, i) -> alertDialog.setMessage(context.getString(R.string.enableGPSRequest)));
+                .setPositiveButton(context.getString(R.string.okSettingAlert), (dialogInterface, i) -> context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+                .setNegativeButton(context.getString(R.string.cancelSettingAlert), (dialogInterface, i) -> {
+                    alertDialog.dismiss();
+                    AlertDialog.Builder newBuilder = new AlertDialog.Builder(context);
+                    AlertDialog alertDialog2;
+                    newBuilder.setTitle(context.getString(R.string.titleSettingAlert))
+                            .setMessage(context.getString(R.string.enableGPSRequest))
+                            .setPositiveButton(context.getString(R.string.okSettingAlert), (dialogInterface2, i2) -> context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+                            .setNegativeButton(context.getString(R.string.dimissSettingAlert), null);
+                    alertDialog2 = newBuilder.create();
+                    alertDialog2.show();
+                });
         alertDialog = builder.create();
         alertDialog.show();
     }

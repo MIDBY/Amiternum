@@ -1,23 +1,15 @@
 package it.univaq.amiternum.Model;
 
-import android.widget.Toast;
-
 import androidx.room.Entity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import it.univaq.amiternum.Utility.ConversionCallback;
-import it.univaq.amiternum.Utility.Converter;
 
 @Entity(tableName = "oggetti", primaryKeys = {"id"})
 public class Oggetto3D implements Serializable {
@@ -27,6 +19,7 @@ public class Oggetto3D implements Serializable {
     private String urlAudio;
     private String urlVideo;
     private String urlFiles;
+    //TODO:elimina attributo con sue classi
     private String resourcePath;
 
     public static Oggetto3D parseJson(JSONObject json){
@@ -150,5 +143,10 @@ public class Oggetto3D implements Serializable {
         return files.stream()
             .filter(s -> !s.endsWith(".obj") && !s.endsWith(".mtl"))
             .toArray(String[]::new);
+    }
+
+    public String getFileName() {
+        String[] splitted = getObjUrlFile().split("/");
+        return splitted[splitted.length - 1].split("\\.")[0];
     }
 }

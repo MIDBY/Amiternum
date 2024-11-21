@@ -3,15 +3,20 @@ package it.univaq.amiternum.Fragment;
 import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
 
 import android.Manifest;
-import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,18 +29,23 @@ import androidx.fragment.app.Fragment;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.assets.RenderableSource;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.CaptureActivity;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import it.univaq.amiternum.Database.DB;
 import it.univaq.amiternum.Model.Oggetto3D;
 import it.univaq.amiternum.R;
+import it.univaq.amiternum.Utility.ConversionCallback;
 import it.univaq.amiternum.Utility.Converter;
 import it.univaq.amiternum.Utility.GetData;
 import it.univaq.amiternum.Utility.Pref;
@@ -46,7 +56,9 @@ public class ArFragmentIndoor extends Fragment {
     private ArFragment arFragment;
     private ArrayList<Oggetto3D> oggetti = new ArrayList<>();
     private Oggetto3D oggetto;
-    private AlertDialog dialog;
+    private int secondsElapsed = 0;
+
+    private final String ASSET_ONLINE = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/refs/heads/main/2.0/Fox/glTF/Fox.gltf";
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
                 if(!result)
@@ -59,7 +71,11 @@ public class ArFragmentIndoor extends Fragment {
             result -> {
                 if(result.getContents() != null) {
                     oggetto = handleQRCode(result.getContents());
-                    handleObject();
+                    //TODO: mostra la scritta
+                    //Toast.makeText(requireContext(), "Premi sullo schermo per visualizzare l'oggetto",Toast.LENGTH_SHORT).show();
+                    //TODO:elimina condizione
+                    if(oggetto.getResourcePath() == null || oggetto.getResourcePath().isEmpty())
+                        handleObject();
                 }
     });
 
@@ -84,9 +100,31 @@ public class ArFragmentIndoor extends Fragment {
         if (!CameraHelper.checkCameraPermission(requireContext()))
             launcherCamera.launch(Manifest.permission.CAMERA);
 
+        if(this.getArguments() != null) {
+            oggetto = (Oggetto3D) this.getArguments().get("object");
+            if(oggetto != null) {
+                TextView banner = view.findViewById(R.id.objectToScanText);
+                banner.setText("Scansiona il qr code dell'opera: " + oggetto.getNome() + " per continuare");
+                AlphaAnimation alphaAnim = new AlphaAnimation(1.0f,0.0f);
+                alphaAnim.setStartOffset(2000);                        // start in 5 seconds
+                alphaAnim.setDuration(3000);
+                alphaAnim.setAnimationListener(new Animation.AnimationListener()
+                {
+                    @Override
+                    public void onAnimationStart(Animation animation) { banner.setVisibility(View.VISIBLE);}
+
+                    public void onAnimationEnd(Animation animation) { banner.setVisibility(View.INVISIBLE); }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                banner.setAnimation(alphaAnim);
+            }
+        }
+
         arFragment = (ArFragment) getChildFragmentManager().findFragmentById(R.id.ar_fragment);
         arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-            if (oggetto != null && !oggetto.getResourcePath().isEmpty())
+            if (oggetto != null && oggetto.getResourcePath() != null &&!oggetto.getResourcePath().isEmpty())
                 placeModel(hitResult.createAnchor());
             else
                 Toast.makeText(requireContext(), "Scansiona un qr code del museo per continuare",Toast.LENGTH_SHORT).show();
@@ -96,21 +134,28 @@ public class ArFragmentIndoor extends Fragment {
     }
 
     private void placeModel(Anchor anchor) {
+        for (int j = arFragment.getArSceneView().getScene().getChildren().size()-1; j>=1 ; j--) {
+            Node childNode = arFragment.getArSceneView().getScene().getChildren().get(j);
+            arFragment.getArSceneView().getScene().removeChild(childNode);
+        }
         ModelRenderable.builder()
                 .setSource(requireContext(),
                         RenderableSource.builder()
-                                .setSource(requireContext(), Uri.parse(oggetto.getResourcePath()), RenderableSource.SourceType.GLTF2)
+                                //TODO:imposta risorsa del file gltf (oggetto.getFirstUrlFileByExtension("gltf"))
+                                //.setSource(requireContext(), Uri.parse("file:///" + oggetto.getResourcePath()), RenderableSource.SourceType.GLTF2)
+                                .setSource(requireContext(), Uri.parse(ASSET_ONLINE), RenderableSource.SourceType.GLTF2)
                                 .build()
-                ).setRegistryId(oggetto.getResourcePath())
+                ).setRegistryId(ASSET_ONLINE)
                 .build()
                 .thenAccept(renderable -> {
                     AnchorNode anchorNode = new AnchorNode(anchor);
                     anchorNode.setRenderable(renderable);
+                    anchorNode.setLocalScale(new Vector3(0.3f,0.3f,0.3f));
                     arFragment.getArSceneView().getScene().addChild(anchorNode);
                 })
                 .exceptionally(throwable -> {
                     Log.e("ARModel", "Unable to load model: " + throwable.getMessage());
-                    Toast.makeText(requireContext(), "Unable to load model", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), getString(R.string.errorModelLoad), Toast.LENGTH_LONG).show();
                     return null;
                 });
     }
@@ -134,7 +179,6 @@ public class ArFragmentIndoor extends Fragment {
     }
 
     public void startQrCodeScanner() {
-        oggetto = null;
         ScanOptions options = new ScanOptions();
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
         options.setCaptureActivity(CaptureActivity.class);
@@ -144,23 +188,88 @@ public class ArFragmentIndoor extends Fragment {
         barcodeLauncher.launch(options);
     }
 
+    //TODO:elimina funzione
     private void handleObject() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setView(R.layout.progress_layout);
-        builder.setMessage("Ricevo l'oggetto richiesto dalla galassia vicina");
-        dialog = builder.create();
-        dialog.show();
-        dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        if(oggetto.getResourcePath() == null || oggetto.getResourcePath().isEmpty())
-            Converter.downloadResource(requireContext(), oggetto);
+        if(!checkFileFromDirectory()) {
+            Handler handler = new Handler();
+            secondsElapsed = 0;
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setContentView(R.layout.progress_layout);
+            ((TextView) dialog.findViewById(R.id.progressMessage)).setText(R.string.waitingText);
+            TextView counter = dialog.findViewById(R.id.progressText);
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialogInterface) {
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            secondsElapsed++;
+                            counter.setText("" + secondsElapsed);
+                            handler.postDelayed(this, 1000);
+                        }
+                    }, 1000);
+                }
+            });
+
+            dialog.show();
+            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            Converter.convertToGltf(oggetto, new ConversionCallback() {
+                @Override
+                public void onConversionComplete(byte[] outputData) {
+                    File path = requireContext().getFilesDir();
+                    String filename = oggetto.getFileName() + ".gltf";
+                    try {
+                        FileOutputStream writer = new FileOutputStream(new File(path, filename));
+                        writer.write(outputData);
+                        writer.close();
+                        requireActivity().runOnUiThread(() -> {
+                            oggetto.setResourcePath(path + "/" + filename);
+                            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            dialog.dismiss();
+                            handler.removeCallbacksAndMessages(null);
+                            Toast.makeText(requireContext(), "Premi sullo schermo per visualizzare l'oggetto",Toast.LENGTH_SHORT).show();
+                        });
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public void onConversionFailed() {
+                    Toast.makeText(requireContext(), "Errore nel caricamento dell'oggetto " + oggetto.getFileName(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            File path = requireContext().getFilesDir();
+            String filename = oggetto.getFileName() + ".gltf";
+            oggetto.setResourcePath(path + "/" + filename);
+            Toast.makeText(requireContext(), "Premi sullo schermo per visualizzare l'oggetto",Toast.LENGTH_SHORT).show();
+        }
     }
 
     private Oggetto3D handleQRCode(String qrCodeData) {
+        oggetto = null;
         int id = Integer.parseInt(qrCodeData.split("-")[0]);
         for(Oggetto3D o : oggetti)
             if(o.getId() == id)
                 return o;
         return null;
+    }
+
+    //TODO:elimina funzione
+    private boolean checkFileFromDirectory() {
+        File directory = requireContext().getFilesDir();
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile() && file.getName().equals(oggetto.getFileName() + ".gltf")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

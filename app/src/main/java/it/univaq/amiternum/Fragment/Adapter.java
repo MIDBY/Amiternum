@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -63,6 +64,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         private MediaPlayer mediaPlayer;
         private final Handler handler = new Handler();
         private Runnable runnable, runnable2;
+        //private final String ASSET_ONLINE = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/refs/heads/main/2.0/Fox/glTF/Fox.gltf";
 
 
         public ViewHolder(@NonNull View view) {
@@ -252,7 +254,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
             artwork.findViewById(R.id.indoorArButton).setOnClickListener(v -> {
                 artwork.dismiss();
-                Navigation.findNavController(view).navigate(R.id.action_navHome_to_navIndoor);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("object", oggetto);
+                Navigation.findNavController(view).navigate(R.id.action_navHome_to_navIndoor, bundle);
             });
 
             artwork.show();
@@ -263,6 +267,21 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             title.setText(oggetto.getNome());
             if(oggetto.getUrlFiles() != null) {
                 Picasso.get().load(oggetto.getFirstUrlFileByExtension("jpg")).resize(180,160).centerCrop().into(image);
+                //TODO: carica modello (non ancora perfezionato)
+                /*
+                ModelRenderable.builder()
+                        .setSource(context, Uri.parse(ASSET_ONLINE)) // Use your model file here
+                        .build()
+                        .thenAccept(renderable -> {
+                            AnchorNode anchorNode = new AnchorNode();
+                            anchorNode.setRenderable(renderable);
+                            anchorNode.setLocalScale(new Vector3(0.3f,0.3f,0.3f));
+                            image.getScene().addChild(anchorNode);
+                        })
+                        .exceptionally(throwable -> {
+                            Log.e("ARModel", "Unable to load model: " + throwable.getMessage());
+                            return null;
+                        });*/
             }
         }
 

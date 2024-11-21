@@ -57,7 +57,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                     if(result){
                         locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
                     } else {
-                        Toast.makeText(requireContext(),"Autorizzazione necessaria",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(),getString(R.string.authRequestText),Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -77,7 +77,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
 
         SupportMapFragment fragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTestFragment);
         textView = view.findViewById(R.id.textView);
@@ -138,35 +138,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        if (map == null){
-            return;
-        }
-        userLocation = location;
-        if (myMarker == null) {
-            MarkerOptions options = new MarkerOptions();
-            options.title(getString(R.string.myPosition));
-            options.position(new LatLng(location.getLatitude(), location.getLongitude()));
-            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f);
-            myMarker = map.addMarker(options);
-        } else {
-            myMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
-        }
+        if(getContext() != null) {
+            if (map == null) {
+                return;
+            }
+            userLocation = location;
+            if (myMarker == null) {
+                MarkerOptions options = new MarkerOptions();
+                options.title(getString(R.string.myPosition));
+                options.position(new LatLng(location.getLatitude(), location.getLongitude()));
+                options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f);
+                myMarker = map.addMarker(options);
+            } else {
+                myMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+            }
 
-        if(userLocation.hasAltitude()){
-            String text =   getString(R.string.latitudeText)+ " " + userLocation.getLatitude() + "°\n" +
-                            getString(R.string.longitudeText)+ " " + userLocation.getLongitude() + "°\n" +
-                            getString(R.string.altitudeText)+ " " + Math.round(userLocation.getAltitude()) + getString(R.string.altitudeMeasuring);
-            textView.setText(text);
-        } else{
-            String text =   getString(R.string.latitudeText)+ " " + userLocation.getLatitude() + "°\n" +
-                            getString(R.string.longitudeText)+ " " + userLocation.getLongitude() + "°";
-            textView.setText(text);
+            if (userLocation.hasAltitude()) {
+                String text = getString(R.string.latitudeText) + " " + userLocation.getLatitude() + "°\n" +
+                        getString(R.string.longitudeText) + " " + userLocation.getLongitude() + "°\n" +
+                        getString(R.string.altitudeText) + " " + Math.round(userLocation.getAltitude()) + getString(R.string.altitudeMeasuring);
+                textView.setText(text);
+            } else {
+                String text = getString(R.string.latitudeText) + " " + userLocation.getLatitude() + "°\n" +
+                        getString(R.string.longitudeText) + " " + userLocation.getLongitude() + "°";
+                textView.setText(text);
+            }
+
+            LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+
+            myMarker.setPosition(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getCameraPosition().zoom));
         }
-
-        LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-
-        myMarker.setPosition(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20f));
     }
 
     public static float distanceBetween(LatLng first, LatLng second) {
@@ -177,7 +179,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
         map = googleMap;
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -197,32 +199,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 requireActivity().runOnUiThread(()-> map.addMarker(markerOptions));
             }
         }
+
+        if (myMarker == null) {
+            requireActivity().runOnUiThread(()->{
+                myMarker = map.addMarker(new MarkerOptions()
+                        .position(new LatLng(0, 0))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0,0),0f));
+            });
+        } else {
+            LatLng lng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+            requireActivity().runOnUiThread(()-> myMarker = map.addMarker(new MarkerOptions()
+                    .position(lng)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker30)).anchor(0.5f, 0.5f)));
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.start(requireContext(), this::onLocationChanged);
+        locationHelper.start(requireContext(), MapFragment.this::onLocationChanged);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        locationHelper.stop(this::onLocationChanged);
+        locationHelper.stop(MapFragment.this::onLocationChanged);
     }
 }
