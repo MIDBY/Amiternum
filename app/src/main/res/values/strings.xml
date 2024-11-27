@@ -39,5 +39,8 @@
     <string name="errorModelLoad">Non riesco a caricare il modello</string>
     <string name="scan">Scansiona QR code</string>
     <string name="myPosition">Sono qui!</string>
-    <string name="waitingText">Ricevo l\'oggetto richiesto dalla galassia vicina</string>
+    <string name="waitingText">Ricevo l\'oggetto dalla galassia vicina</string>
+    <string name="impatientText">La galassia vicina è andata distrutta</string>
+    <string name="tapScreen">Premi sullo schermo per visualizzare l\'oggetto</string>
+    <string name="scanText">Scansiona un qr code del museo per continuare</string>
 </resources>

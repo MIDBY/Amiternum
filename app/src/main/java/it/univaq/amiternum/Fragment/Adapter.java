@@ -16,7 +16,11 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -224,20 +228,23 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        if (fromUser)
+                        if (fromUser) {
+                            video.pause();
                             video.seekTo(progress);
+                            video.start();
+                        }
                         playerPosition2.setText(convertFormat(video.getCurrentPosition()));
                     }
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         video.pause();
+
                     }
 
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
-                        if(btPause2.getVisibility() == View.VISIBLE)
-                            video.start();
+                        video.start();
                     }
                 });
                 video.setOnCompletionListener(mediaPlayer -> {
@@ -256,7 +263,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 artwork.dismiss();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("object", oggetto);
-                Navigation.findNavController(view).navigate(R.id.action_navHome_to_navIndoor, bundle);
+                Navigation.findNavController(view)
+                        .navigate(R.id.action_navHome_to_navIndoor, bundle, new NavOptions.Builder().setPopUpTo(R.id.navHome, true).build());
             });
 
             artwork.show();
@@ -267,21 +275,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             title.setText(oggetto.getNome());
             if(oggetto.getUrlFiles() != null) {
                 Picasso.get().load(oggetto.getFirstUrlFileByExtension("jpg")).resize(180,160).centerCrop().into(image);
-                //TODO: carica modello (non ancora perfezionato)
-                /*
-                ModelRenderable.builder()
-                        .setSource(context, Uri.parse(ASSET_ONLINE)) // Use your model file here
-                        .build()
-                        .thenAccept(renderable -> {
-                            AnchorNode anchorNode = new AnchorNode();
-                            anchorNode.setRenderable(renderable);
-                            anchorNode.setLocalScale(new Vector3(0.3f,0.3f,0.3f));
-                            image.getScene().addChild(anchorNode);
-                        })
-                        .exceptionally(throwable -> {
-                            Log.e("ARModel", "Unable to load model: " + throwable.getMessage());
-                            return null;
-                        });*/
             }
         }
 

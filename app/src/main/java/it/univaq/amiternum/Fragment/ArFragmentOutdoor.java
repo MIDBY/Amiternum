@@ -147,7 +147,8 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                             float dist = distanceBetween(new LatLng(originLatitude, originLongitude), new LatLng(latitude, longitude));
                             float scaleFactor = 0f;
                             if(dist < 1000)
-                                scaleFactor = calculateScale(dist) / 10;
+                                scaleFactor = calculateScale(dist);
+                            Toast.makeText(requireContext(), punti.get(index).getLuogo() + " fattore scala: " + scaleFactor, Toast.LENGTH_SHORT).show();
                             textViewNodeCycle.setRenderable(renderable);
                             textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
                             float[] deviceRotation = worldPose.getRotationQuaternion();

@@ -30,7 +30,6 @@ import java.util.List;
 import it.univaq.amiternum.Database.DB;
 import it.univaq.amiternum.Model.Oggetto3D;
 import it.univaq.amiternum.R;
-import it.univaq.amiternum.Utility.Converter;
 import it.univaq.amiternum.Utility.GetData;
 import it.univaq.amiternum.Utility.InternetRequest;
 import it.univaq.amiternum.Utility.OnRequest;
@@ -54,10 +53,6 @@ public class ListFragment extends Fragment {
         ((TextView) view.findViewById(R.id.titleHomepage)).setText(R.string.subtitle);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setAdapter(adapter);
-        //TODO:elimina permessi
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-        }
 
         if(oggetti.isEmpty()) {
             if (Pref.load(requireContext(), "firstAccess", true)) {
@@ -75,7 +70,6 @@ public class ListFragment extends Fragment {
                             for(int i = 0; i < array.length(); i++) {
                                 JSONObject item = array.getJSONObject(i);
                                 Oggetto3D oggetto = Oggetto3D.parseJson(item);
-                                Converter.downloadResource(requireContext().getApplicationContext(), oggetto);
                                 oggetti.add(oggetto);
                             }
                         } catch (JSONException e) {

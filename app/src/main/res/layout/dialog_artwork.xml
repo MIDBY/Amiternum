@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/senape"
     android:padding="10dp">
 
@@ -218,6 +219,8 @@
             android:text="@string/arResourceText"
             android:layout_marginTop="10dp"
             android:textColor="@color/black"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            app:navGraph="@navigation/nav_ui"
+            app:defaultNavHost="true" />
     </LinearLayout>
 </RelativeLayout>

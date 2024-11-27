@@ -18,6 +18,7 @@ public class LocationHelper {
     private LocationManager manager;
     private final ActivityResultLauncher<String> launcher;
     private AlertDialog alertDialog;
+    private boolean created = false;
 
     public LocationHelper(ActivityResultLauncher<String> launcher) {
         this.launcher = launcher;
@@ -27,7 +28,8 @@ public class LocationHelper {
         manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            showSettingAlert(context);
+            if(!created)
+                showSettingAlert(context);
         }
         if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && alertDialog != null && alertDialog.isShowing()) {
             alertDialog.dismiss();
@@ -65,5 +67,6 @@ public class LocationHelper {
                 });
         alertDialog = builder.create();
         alertDialog.show();
+        created = true;
     }
 }

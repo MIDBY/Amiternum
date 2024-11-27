@@ -119,34 +119,12 @@ public class Oggetto3D implements Serializable {
         return null;
     }
 
-    public String getObjUrlFile() {
+    public String getGltfUrlFile() {
         List<String> files = getUrlFilesAsList();
         for(String s : files) {
-            if(s.endsWith(".obj"))
+            if(s.endsWith(".gltf"))
                 return s;
         }
         return null;
-    }
-
-    public String getMtlUrlFile() {
-        List<String> files = getUrlFilesAsList();
-        for(String s : files) {
-            if(s.endsWith(".mtl"))
-                return s;
-        }
-        return null;
-    }
-
-    public String[] getImgUrlFiles() {
-        List<String> files = getUrlFilesAsList();
-
-        return files.stream()
-            .filter(s -> !s.endsWith(".obj") && !s.endsWith(".mtl"))
-            .toArray(String[]::new);
-    }
-
-    public String getFileName() {
-        String[] splitted = getObjUrlFile().split("/");
-        return splitted[splitted.length - 1].split("\\.")[0];
     }
 }
