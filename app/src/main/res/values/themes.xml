@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.Amiternum" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/orange</item>
+        <item name="colorPrimary">@color/blue</item>
         <item name="colorPrimaryVariant">@color/blue</item>
         <item name="colorOnPrimary">@color/senape</item>
         <!-- Secondary brand color. -->

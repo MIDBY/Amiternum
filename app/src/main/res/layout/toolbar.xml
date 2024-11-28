@@ -3,11 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/orange"
+    android:background="@color/blue"
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    app:navigationIcon="@drawable/museum_icon"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    app:title="@string/title" >
+    app:navigationIcon="@drawable/ic_museum_icon"
+    app:title="@string/title"
+    app:titleTextColor="@color/senape">
 
 </androidx.appcompat.widget.Toolbar>

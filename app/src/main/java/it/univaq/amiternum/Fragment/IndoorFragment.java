@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +48,7 @@ import it.univaq.amiternum.Utility.GetData;
 import it.univaq.amiternum.Utility.Pref;
 import it.univaq.amiternum.helpers.CameraHelper;
 
-public class ArFragmentIndoor extends Fragment {
+public class IndoorFragment extends Fragment {
 
     private ArFragment arFragment;
     private ArrayList<Oggetto3D> oggetti = new ArrayList<>();
@@ -68,14 +68,14 @@ public class ArFragmentIndoor extends Fragment {
             result -> {
                 if(result.getContents() != null) {
                     oggetto = handleQRCode(result.getContents());
-                    Toast.makeText(requireContext(), getString(R.string.tapScreen),Toast.LENGTH_SHORT).show();
+                    renderText(requireView(), getString(R.string.tapScreen));
                 }
     });
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_indoor,container,false);
+        return inflater.inflate(R.layout.fragment_indoor,container,false);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class ArFragmentIndoor extends Fragment {
                         @Override
                         public void run() {
                             secondsElapsed++;
-                            counter.setText("" + secondsElapsed);
+                            counter.setText(secondsElapsed + "");
                             handler.postDelayed(this, 1000);
                         }
                     }, 1000);
@@ -171,17 +171,17 @@ public class ArFragmentIndoor extends Fragment {
                         return null;
                     });
         } else {
-            TextView textViewCicle = (TextView) getLayoutInflater().inflate(R.layout.ar_textview, null);
-            String textString = "<bold>Titolo:</bold> <small>" + oggetto.getNome() + "</small><br>\n" + "<bold>Descrizione:</bold> <small>" + oggetto.getDescrizione() + "</small>";
-            textViewCicle.setText(Html.fromHtml(textString, Html.FROM_HTML_MODE_LEGACY));
+            LinearLayout infoPanel = (LinearLayout) getLayoutInflater().inflate(R.layout.info_panel, null);
+            ((TextView) infoPanel.findViewById(R.id.titleTextViewAr)).setText(oggetto.getNome());
+            ((TextView) infoPanel.findViewById(R.id.subtitleTextViewAr)).setText(oggetto.getDescrizione());
 
             ViewRenderable.builder()
-                    .setView(requireContext(), textViewCicle)
+                    .setView(requireContext(), infoPanel)
                     .build()
                     .thenAccept(renderable -> {
                         Node textViewNodeCycle = new Node();
                         Pose worldPose = anchor.getPose();
-                        float scaleFactor = 1.5f;
+                        float scaleFactor = 1f;
                         textViewNodeCycle.setRenderable(renderable);
                         textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
                         float[] deviceRotation = worldPose.getRotationQuaternion();
@@ -224,7 +224,7 @@ public class ArFragmentIndoor extends Fragment {
         ScanOptions options = new ScanOptions();
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
         options.setCaptureActivity(CaptureActivity.class);
-        options.setPrompt("Scan a museum QR code");
+        options.setPrompt(getString(R.string.scanMuseumQR));
         options.setCameraId(0);
         options.setBeepEnabled(false);
         barcodeLauncher.launch(options);
@@ -243,8 +243,8 @@ public class ArFragmentIndoor extends Fragment {
         TextView banner = view.findViewById(R.id.objectToScanText);
         banner.setText(text);
         AlphaAnimation alphaAnim = new AlphaAnimation(1.0f, 0.0f);
-        alphaAnim.setStartOffset(2000);                        // start in 5 seconds
-        alphaAnim.setDuration(3000);
+        alphaAnim.setStartOffset(2000);
+        alphaAnim.setDuration(5000);
         alphaAnim.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {

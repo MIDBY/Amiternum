@@ -2,7 +2,7 @@
     <string name="app_name">Amiternum</string>
     <string name="app_subtitle">La nostra storia</string>
     <string name="app_subtitle2">con gli occhi del futuro</string>
-    <string name="app_subtitle3">Powered by:</string>
+    <string name="app_subtitle3">Powered by</string>
     <string name="icon">icona</string>
     <string name="app_test">APP TEST</string>
     <string name="start">Start</string>
@@ -16,9 +16,9 @@
     <string name="refresh">Refresh</string>
     <string name="tracking">Tracking…</string>
     <string name="title">Museo Munda e Sito Amiternum</string>
-    <string name="subtitle">Scopri le nostre opere</string>
+    <string name="subtitle">Riscopri la storia</string>
     <string name="outdoorButton">Visita il sito archeologico Amiternum</string>
-    <string name="descriptionText">Descrizione: </string>
+    <string name="descriptionText">Descrizione </string>
     <string name="latitudeText">Latitudine: </string>
     <string name="longitudeText">Longitudine: </string>
     <string name="altitudeText">Altitudine: </string>
@@ -37,10 +37,11 @@
     <string name="enableGPSRequest">Il GPS è disattivato, attivalo per continuare</string>
     <string name="authRequestText">Autorizzazione necessaria</string>
     <string name="errorModelLoad">Non riesco a caricare il modello</string>
+    <string name="scanMuseumQR">Scansiona un QR del museo</string>
     <string name="scan">Scansiona QR code</string>
     <string name="myPosition">Sono qui!</string>
     <string name="waitingText">Ricevo l\'oggetto dalla galassia vicina</string>
     <string name="impatientText">La galassia vicina è andata distrutta</string>
-    <string name="tapScreen">Premi sullo schermo per visualizzare l\'oggetto</string>
+    <string name="tapScreen">Attendi che compaiano i puntini poi cliccaci sopra</string>
     <string name="scanText">Scansiona un qr code del museo per continuare</string>
 </resources>

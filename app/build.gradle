@@ -26,12 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'lwjgl.dll.sha1'
-        exclude 'lwjgl32.dll.sha1'
-    }
 }
 
 dependencies {

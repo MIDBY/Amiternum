@@ -9,7 +9,7 @@
         android:id="@+id/navHome"
         android:name="it.univaq.amiternum.Fragment.ListFragment"
         android:label="ListFragment"
-        tools:layout="@layout/list_fragment">
+        tools:layout="@layout/fragment_list">
         <action
             android:id="@+id/action_navHome_to_navIndoor"
             app:destination="@id/navIndoor" />
@@ -19,18 +19,18 @@
     </fragment>
     <fragment
         android:id="@+id/navIndoor"
-        android:name="it.univaq.amiternum.Fragment.ArFragmentIndoor"
+        android:name="it.univaq.amiternum.Fragment.IndoorFragment"
         android:label="ArFragment"
-        tools:layout="@layout/activity_indoor">
+        tools:layout="@layout/fragment_indoor">
         <action
             android:id="@+id/action_navIndoor_to_navHome"
             app:destination="@id/navHome" />
     </fragment>
     <fragment
         android:id="@+id/navOutdoor"
-        android:name="it.univaq.amiternum.OutdoorActivity"
+        android:name="it.univaq.amiternum.Fragment.OutdoorFragment"
         android:label="activity_outdoor"
-        tools:layout="@layout/activity_outdoor" >
+        tools:layout="@layout/fragment_outdoor" >
         <action
             android:id="@+id/action_navOutdoor_to_navHome"
             app:destination="@id/navHome" />

@@ -5,7 +5,7 @@
     android:id="@+id/ARContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="it.univaq.amiternum.OutdoorActivity">
+    tools:context="it.univaq.amiternum.Fragment.OutdoorFragment">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/ar_scene_viewFragment"
@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/divider"
-        tools:layout="@layout/ar_fragment_outdoor" />
+        tools:layout="@layout/fragment_outdoor_ar" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/divider"
@@ -50,6 +50,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider"
-        tools:layout="@layout/map_fragment" />
+        tools:layout="@layout/fragment_map" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,37 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/senape"
-    android:padding="10dp">
+    android:padding="20dp">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/exitButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:contentDescription="@string/icon"
+            android:src="@drawable/arrow_back" />
 
         <TextView
             android:id="@+id/artworkTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:gravity="center"
+            android:textColor="@color/blue"
             android:textSize="24sp"
             android:textStyle="bold"
-            tools:text="Titolo"
-            android:gravity="center"
-            android:layout_gravity="center"/>
+            tools:text="Titolo" />
 
         <TextView
             android:id="@+id/artworkDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:textColor="@color/cardview_dark_background"
+            android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="@string/descriptionText"/>
+            tools:text="@string/descriptionText" />
 
         <LinearLayout
             android:id="@+id/audioLayout"
@@ -43,16 +52,18 @@
                 android:id="@+id/artworkAudioResource"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:textColor="@color/cardview_dark_background"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="@string/audioResourceText"
-                android:layout_marginTop="10dp"
-                android:gravity="center"/>
+                android:visibility="gone"
+                tools:text="@string/audioResourceText" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:orientation="horizontal"
                 android:padding="12dp">
 
@@ -60,9 +71,9 @@
                     android:id="@+id/player_position"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="00:00"
+                    android:textColor="@color/blue"
                     android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    tools:text="00:00" />
 
                 <SeekBar
                     android:id="@+id/seek_bar"
@@ -74,47 +85,49 @@
                     android:id="@+id/player_duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="00:00"
+                    android:textColor="@color/blue"
                     android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    tools:text="00:00" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_gravity="center">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/bt_rew"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/fast_rewind"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="30dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/left_sign" />
 
                 <ImageView
                     android:id="@+id/bt_play"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/play_circle" />
 
                 <ImageView
                     android:id="@+id/bt_pause"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_pause"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:contentDescription="@string/icon"
-                    android:visibility="gone"/>
+                    android:src="@drawable/pause_circle"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/bt_fw"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/fast_forward"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/right_sign" />
 
             </LinearLayout>
         </LinearLayout>
@@ -129,32 +142,34 @@
                 android:id="@+id/artworkVideoResource"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:textColor="@color/cardview_dark_background"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="@string/videoResourceText"
-                android:layout_marginTop="10dp"
-                android:gravity="center" />
+                android:visibility="gone"
+                tools:text="@string/videoResourceText" />
 
             <VideoView
                 android:id="@+id/videoView"
                 android:layout_width="match_parent"
-                android:layout_height="250dp" />
+                android:layout_height="250dp"
+                android:layout_marginTop="15dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/grey"
                 android:orientation="horizontal"
-                android:padding="12dp"
-                android:background="@color/grey">
+                android:padding="12dp">
 
                 <TextView
                     android:id="@+id/player_position2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="00:00"
+                    android:textColor="@color/blue"
                     android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    tools:text="00:00" />
 
                 <SeekBar
                     android:id="@+id/seek_bar2"
@@ -166,47 +181,50 @@
                     android:id="@+id/player_duration2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="00:00"
+                    android:textColor="@color/blue"
                     android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    tools:text="00:00" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:layout_gravity="center">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/bt_rew2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/fast_rewind"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="30dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/left_sign" />
 
                 <ImageView
                     android:id="@+id/bt_play2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/play_circle" />
 
                 <ImageView
                     android:id="@+id/bt_pause2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_pause"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:contentDescription="@string/icon"
-                    android:visibility="gone"/>
+                    android:src="@drawable/pause_circle"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/bt_fw2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/fast_forward"
-                    android:contentDescription="@string/icon"/>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:contentDescription="@string/icon"
+                    android:src="@drawable/right_sign" />
 
             </LinearLayout>
 
@@ -216,11 +234,12 @@
             android:id="@+id/indoorArButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/arResourceText"
             android:layout_marginTop="10dp"
-            android:textColor="@color/black"
+            android:backgroundTint="@color/blue"
+            android:text="@string/arResourceText"
+            android:textColor="@color/white"
             android:textStyle="bold"
-            app:navGraph="@navigation/nav_ui"
-            app:defaultNavHost="true" />
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_ui" />
     </LinearLayout>
 </RelativeLayout>

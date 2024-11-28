@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="it.univaq.amiternum.IndoorActivity">
+    tools:context="it.univaq.amiternum.Fragment.IndoorFragment">
 
     <fragment
         android:id="@+id/ar_fragment"
@@ -16,22 +16,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <TextView
         android:id="@+id/objectToScanText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:gravity="center_horizontal"
-        tools:text="Ciao"
         android:textColor="@color/orange"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
-
+        app:layout_constraintVertical_bias="0.3"
+        tools:text="Ciao" />
 
     <Button
         android:id="@+id/launchScanner"
@@ -42,6 +43,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="10dp"
         android:text="@string/scan"
-        android:textColor="@color/black" />
+        android:textColor="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

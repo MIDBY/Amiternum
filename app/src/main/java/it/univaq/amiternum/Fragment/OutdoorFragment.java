@@ -1,4 +1,4 @@
-package it.univaq.amiternum;
+package it.univaq.amiternum.Fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -14,12 +14,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
 import androidx.fragment.app.Fragment;
 
-public class OutdoorActivity extends Fragment {
+import it.univaq.amiternum.R;
+
+public class OutdoorFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_outdoor, container, false);
+        return inflater.inflate(R.layout.fragment_outdoor, container, false);
     }
 
     @SuppressLint("ClickableViewAccessibility")

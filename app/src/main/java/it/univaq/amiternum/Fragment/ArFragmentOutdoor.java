@@ -83,7 +83,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.ar_fragment_outdoor,container,false);
+        return inflater.inflate(R.layout.fragment_outdoor_ar,container,false);
     }
 
     @Override
@@ -128,14 +128,14 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
 
             if (punti != null){
                 for (int i = 0; i < punti.size(); i++) {
-                    TextView textViewCicle = (TextView) getLayoutInflater().inflate(R.layout.ar_textview, null);
-                    String textString = punti.get(i).getLuogo() + "\n" + punti.get(i).getDescrizione();
-                    textViewCicle.setText(textString);
+                    TextView infoPanel = (TextView) getLayoutInflater().inflate(R.layout.info_panel, null);
+                    ((TextView) infoPanel.findViewById(R.id.titleTextViewAr)).setText(punti.get(i).getLuogo());
+                    ((TextView) infoPanel.findViewById(R.id.subtitleTextViewAr)).setText(punti.get(i).getDescrizione());
 
                     int index = i;
 
                     ViewRenderable.builder()
-                        .setView(requireContext(), textViewCicle)
+                        .setView(requireContext(), infoPanel)
                         .build()
                         .thenAccept(renderable -> {
                             double latitude = punti.get(index).getLatitudine();
@@ -148,7 +148,6 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                             float scaleFactor = 0f;
                             if(dist < 1000)
                                 scaleFactor = calculateScale(dist);
-                            Toast.makeText(requireContext(), punti.get(index).getLuogo() + " fattore scala: " + scaleFactor, Toast.LENGTH_SHORT).show();
                             textViewNodeCycle.setRenderable(renderable);
                             textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
                             float[] deviceRotation = worldPose.getRotationQuaternion();

@@ -1,10 +1,6 @@
 package it.univaq.amiternum.Fragment;
 
-import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
-
-import android.Manifest;
 import android.app.Dialog;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,8 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,7 +38,7 @@ public class ListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_list, container, false);
     }
 
     @Override
