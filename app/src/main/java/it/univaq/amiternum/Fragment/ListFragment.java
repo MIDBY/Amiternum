@@ -50,12 +50,6 @@ public class ListFragment extends Fragment {
 
         if(oggetti.isEmpty()) {
             if (Pref.load(requireContext(), "firstAccess", true)) {
-                Dialog dialog = new Dialog(requireContext());
-                dialog.setContentView(R.layout.progress_layout);
-                ProgressBar bar = dialog.findViewById(R.id.progressBar);
-                bar.setProgress(0);
-                bar.setMax(100);
-                dialog.show();
                 InternetRequest.asyncRequestOggetto(new OnRequest() {
                     @Override
                     public void onRequestCompleted(String data) {
@@ -70,27 +64,16 @@ public class ListFragment extends Fragment {
                             onParseFailed();
                         }
                         DB.getInstance(requireContext()).getOggettoDao().insert(oggetti);
-                        dialog.dismiss();
                         recyclerView.post(adapter::notifyDataSetChanged);
-                    }
-
-                    @Override
-                    public void onRequestUpdate(int progress) {
-                        ProgressBar bar = dialog.findViewById(R.id.progressBar);
-                        bar.setProgress(progress);
-                        TextView text = dialog.findViewById(R.id.progressText);
-                        text.setText(progress + " %");
                     }
 
                     @Override
                     public void onRequestFailed() {
                         Log.d("CONNECTION FAILED","problemi nella richiesta");
-                        dialog.dismiss();
                     }
 
                     public void onParseFailed() {
                         Log.d("PARSE FAILED", "problemi nel parsing");
-                        dialog.dismiss();
                     }
                 });
                 GetData.downloadPunto(requireContext());

@@ -11,7 +11,6 @@
 
     <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-feature android:name="com.google.ar.core.depth" />
 
     <application
         android:allowBackup="true"
@@ -35,13 +34,19 @@
 
         <activity android:name=".SplashActivity"
             android:exported="true"
-            android:noHistory="true" >
+            android:noHistory="true"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" android:exported="true" />
-        <activity android:name="com.journeyapps.barcodescanner.CaptureActivity" android:exported="true" android:screenOrientation="fullSensor" tools:replace="screenOrientation"/>
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize"/>
+        <activity android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:exported="true"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation"/>
     </application>
 </manifest>

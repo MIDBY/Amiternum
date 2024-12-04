@@ -13,7 +13,7 @@ public class InternetRequest {
     //USO HTTP URL CONNECTION github-server pointDataset
     public static void asyncRequestPunto(OnRequest listener){
         new Thread(()->{
-            String data = doRequest("GET", "https://MIDBY.github.io/Amiternum-project/pointDataset.json", listener);
+            String data = doRequest("GET", "https://MIDBY.github.io/Amiternum-project/pointDataset.json");
             if (data != null && !data.isEmpty()){
                 if(listener != null)
                     listener.onRequestCompleted(data);
@@ -24,7 +24,7 @@ public class InternetRequest {
 
     public static void asyncRequestOggetto(OnRequest listener){
         new Thread(()->{
-            String data = doRequest("GET","http://med-quad.univaq.it/univaq/vr/script.php", listener);
+            String data = doRequest("GET","http://med-quad.univaq.it/univaq/vr/script.php");
             if (data != null && !data.isEmpty()){
                 if(listener != null)
                     listener.onRequestCompleted(data);
@@ -34,7 +34,7 @@ public class InternetRequest {
     }
 
 
-    private static String doRequest(String method, String address, OnRequest listener){
+    private static String doRequest(String method, String address){
         HttpURLConnection connection = null;
         try{
             URL url = new URL(address);
@@ -47,18 +47,8 @@ public class InternetRequest {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 String line;
 
-                int length = 0;
-                try {
-                    length = Integer.parseInt(connection.getHeaderField("Content-length"));
-                } catch (NumberFormatException ignored) {
-                    length = 1000;
-                }
-
                 while((line = reader.readLine()) != null) {
                     sb.append(line);
-                    int percentage = sb.length() * 100 / length;
-                    if(listener != null)
-                        listener.onRequestUpdate(percentage);
                 }
                 return sb.toString();
             } else {

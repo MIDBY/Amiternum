@@ -7,239 +7,221 @@
     android:background="@color/senape"
     android:padding="20dp">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/exitButton"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:contentDescription="@string/icon"
-            android:src="@drawable/arrow_back" />
-
-        <TextView
-            android:id="@+id/artworkTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/blue"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="Titolo" />
-
-        <TextView
-            android:id="@+id/artworkDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            tools:text="@string/descriptionText" />
+        android:layout_alignParentTop="true">
 
         <LinearLayout
-            android:id="@+id/audioLayout"
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <ImageView
+                android:id="@+id/exitButton"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:contentDescription="@string/icon"
+                android:src="@drawable/arrow_back" />
+
             <TextView
-                android:id="@+id/artworkAudioResource"
+                android:id="@+id/artworkTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:textColor="@color/cardview_dark_background"
-                android:textSize="20sp"
+                android:textColor="@color/blue"
+                android:textSize="24sp"
                 android:textStyle="bold"
-                android:visibility="gone"
-                tools:text="@string/audioResourceText" />
+                tools:text="Titolo" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/artworkDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:orientation="horizontal"
-                android:padding="12dp">
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                tools:text="@string/descriptionText" />
 
-                <TextView
-                    android:id="@+id/player_position"
-                    android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/audioLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/blue"
-                    android:textStyle="bold"
-                    tools:text="00:00" />
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <SeekBar
-                    android:id="@+id/seek_bar"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/player_position"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue"
+                        android:textStyle="bold"
+                        tools:text="00:00" />
+
+                    <SeekBar
+                        android:id="@+id/seek_bar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/player_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue"
+                        android:textStyle="bold"
+                        tools:text="00:00" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/player_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/blue"
-                    android:textStyle="bold"
-                    tools:text="00:00" />
+                    <ImageView
+                        android:id="@+id/bt_rew"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginEnd="30dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/left_sign" />
 
+                    <ImageView
+                        android:id="@+id/bt_play"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/play_circle" />
+
+                    <ImageView
+                        android:id="@+id/bt_pause"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/pause_circle"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/bt_fw"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="30dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/right_sign" />
+
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/videoLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/bt_rew"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="30dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/left_sign" />
+                <VideoView
+                    android:id="@+id/videoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center_horizontal"/>
 
-                <ImageView
-                    android:id="@+id/bt_play"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/play_circle" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/grey"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <ImageView
-                    android:id="@+id/bt_pause"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/pause_circle"
-                    android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/player_position2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue"
+                        android:textStyle="bold"
+                        tools:text="00:00" />
 
-                <ImageView
-                    android:id="@+id/bt_fw"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="30dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/right_sign" />
+                    <SeekBar
+                        android:id="@+id/seek_bar2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/player_duration2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue"
+                        android:textStyle="bold"
+                        tools:text="00:00" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/bt_rew2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginEnd="30dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/left_sign" />
+
+                    <ImageView
+                        android:id="@+id/bt_play2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/play_circle" />
+
+                    <ImageView
+                        android:id="@+id/bt_pause2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/pause_circle"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/bt_fw2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="30dp"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/right_sign" />
+
+                </LinearLayout>
 
             </LinearLayout>
-        </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/videoLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/artworkVideoResource"
+            <Button
+                android:id="@+id/indoorArButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:textColor="@color/cardview_dark_background"
-                android:textSize="20sp"
+                android:backgroundTint="@color/blue"
+                android:text="@string/arResourceText"
+                android:textColor="@color/white"
                 android:textStyle="bold"
-                android:visibility="gone"
-                tools:text="@string/videoResourceText" />
-
-            <VideoView
-                android:id="@+id/videoView"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_marginTop="15dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/grey"
-                android:orientation="horizontal"
-                android:padding="12dp">
-
-                <TextView
-                    android:id="@+id/player_position2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/blue"
-                    android:textStyle="bold"
-                    tools:text="00:00" />
-
-                <SeekBar
-                    android:id="@+id/seek_bar2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/player_duration2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/blue"
-                    android:textStyle="bold"
-                    tools:text="00:00" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/bt_rew2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="30dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/left_sign" />
-
-                <ImageView
-                    android:id="@+id/bt_play2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/play_circle" />
-
-                <ImageView
-                    android:id="@+id/bt_pause2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/pause_circle"
-                    android:visibility="gone" />
-
-                <ImageView
-                    android:id="@+id/bt_fw2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="30dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/right_sign" />
-
-            </LinearLayout>
-
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/nav_ui" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/indoorArButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/blue"
-            android:text="@string/arResourceText"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_ui" />
-    </LinearLayout>
+    </ScrollView>
 </RelativeLayout>

@@ -187,8 +187,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         mapSettings = map.getUiSettings();
         mapSettings.setZoomControlsEnabled(true);
         mapSettings.setScrollGesturesEnabled(true);
-        mapSettings.setTiltGesturesEnabled(true);
-        mapSettings.setMyLocationButtonEnabled(true);
 
         if (punti != null) {
             for (Punto p : punti) {
@@ -234,11 +232,5 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         super.onPause();
         locationHelper.stop(MapFragment.this::onLocationChanged);
         mSensorManager.unregisterListener(this, mRotationSensor);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        locationHelper.stop(MapFragment.this::onLocationChanged);
     }
 }

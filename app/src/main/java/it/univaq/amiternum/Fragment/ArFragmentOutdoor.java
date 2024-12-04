@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,8 +62,11 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                 public void onActivityResult(Boolean result) {
                     if(result){
                         locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
-                        if(CameraHelper.checkGeospatialArCorePermissions(requireContext()) && session == null)
-                            startArCoreSession();
+                        if(CameraHelper.checkGeospatialArCorePermissions(requireContext())) {
+                            if (session == null)
+                                startArCoreSession();
+                        } else
+                            launcherCamera.launch(Manifest.permission.CAMERA);
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.authRequestText), Toast.LENGTH_SHORT).show();
                     }
@@ -75,8 +79,11 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                 if(!result) {
                     Toast.makeText(requireContext(), getString(R.string.authRequestText), Toast.LENGTH_SHORT).show();
                 } else
-                    if(CameraHelper.checkGeospatialArCorePermissions(requireContext()) && session == null)
-                        startArCoreSession();
+                    if(CameraHelper.checkGeospatialArCorePermissions(requireContext())) {
+                        if (session == null)
+                            startArCoreSession();
+                    } else
+                        locationHelper.start(requireContext(), ArFragmentOutdoor.this::onLocationChanged);
             }
     );
 
@@ -128,7 +135,7 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
 
             if (punti != null){
                 for (int i = 0; i < punti.size(); i++) {
-                    TextView infoPanel = (TextView) getLayoutInflater().inflate(R.layout.info_panel, null);
+                    LinearLayout infoPanel = (LinearLayout) getLayoutInflater().inflate(R.layout.info_panel, null);
                     ((TextView) infoPanel.findViewById(R.id.titleTextViewAr)).setText(punti.get(i).getLuogo());
                     ((TextView) infoPanel.findViewById(R.id.subtitleTextViewAr)).setText(punti.get(i).getDescrizione());
 
@@ -140,14 +147,12 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
                         .thenAccept(renderable -> {
                             double latitude = punti.get(index).getLatitudine();
                             double longitude = punti.get(index).getLongitudine();
-                            double altitudeCycle = session.getEarth().getCameraGeospatialPose().getAltitude();
+                            double altitudeCycle = Math.max(0, session.getEarth().getCameraGeospatialPose().getAltitude());
                             Pose worldPose = session.getEarth().getPose(latitude, longitude, altitudeCycle, 0f, 0f, 0f, 1f);
                             Anchor anchorCycle = session.createAnchor(worldPose);
                             Node textViewNodeCycle = new Node();
                             float dist = distanceBetween(new LatLng(originLatitude, originLongitude), new LatLng(latitude, longitude));
-                            float scaleFactor = 0f;
-                            if(dist < 1000)
-                                scaleFactor = calculateScale(dist);
+                            float scaleFactor = calculateScale(dist);
                             textViewNodeCycle.setRenderable(renderable);
                             textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
                             float[] deviceRotation = worldPose.getRotationQuaternion();
@@ -174,8 +179,18 @@ public class ArFragmentOutdoor extends Fragment implements LocationListener {
     }
 
     private float calculateScale(float distance) {
-        float scale = distance * 2;
-        return (float) (16 - Math.log(scale) / Math.log(2.0));
+        if(distance <= 5)
+            return 1f;
+        if(5 < distance && distance <= 15)
+            return 2.5f;
+        if(15 < distance && distance <= 30)
+            return 5f;
+        if(30 < distance && distance <= 70)
+            return 12f;
+        if(70 < distance && distance <= 100)
+            return 20f;
+        else
+            return 0f;
     }
 
     @Override

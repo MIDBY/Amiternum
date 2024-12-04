@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -91,8 +92,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
                 ((TextView) artwork.findViewById(R.id.artworkTitle)).setText(oggetto.getNome());
                 ((TextView) artwork.findViewById(R.id.artworkDescription)).setText(oggetto.getDescrizione());
-                ((TextView) artwork.findViewById(R.id.artworkAudioResource)).setText(R.string.audioResourceText);
-                ((TextView) artwork.findViewById(R.id.artworkVideoResource)).setText(R.string.videoResourceText);
                 artwork.findViewById(R.id.exitButton).setOnClickListener(view1 -> artwork.dismiss());
 
                 playerPosition = artwork.findViewById(R.id.player_position);
@@ -117,11 +116,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     String sDuration = convertFormat(duration);
                     playerPosition.setText(R.string.playerZero);
                     playerDuration.setText(sDuration);
+                    seekBar.setMax(duration);
                     btPlay.setOnClickListener(view1 -> {
                         btPlay.setVisibility(View.GONE);
                         btPause.setVisibility(View.VISIBLE);
                         mediaPlayer.start();
-                        seekBar.setMax(mediaPlayer.getDuration());
                         handler.postDelayed(runnable, 0);
                     });
                     btPause.setOnClickListener(view1 -> {
@@ -138,7 +137,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                             playerPosition.setText(convertFormat(currentPosition));
                             mediaPlayer.seekTo(currentPosition);
                             if(!mediaPlayer.isPlaying())
-                                seekBar.setProgress(mediaPlayer.getCurrentPosition()*100/mediaPlayer.getDuration());
+                                seekBar.setProgress(currentPosition);
                         }
                     });
                     btRew.setOnClickListener(view1 -> {
@@ -150,7 +149,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                         playerPosition.setText(convertFormat(currentPosition));
                         mediaPlayer.seekTo(currentPosition);
                         if(!mediaPlayer.isPlaying())
-                            seekBar.setProgress(mediaPlayer.getCurrentPosition()*100/mediaPlayer.getDuration());
+                            seekBar.setProgress(currentPosition);
                     });
                     seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
@@ -217,7 +216,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                             currentPosition = Math.min(currentPosition + 5000, fwDuration);
                             playerPosition2.setText(convertFormat(currentPosition));
                             video.seekTo(currentPosition);
-                            seekBar2.postDelayed(() -> seekBar2.setProgress(video.getCurrentPosition()), 100);
+                            if(!video.isPlaying())
+                                seekBar2.setProgress(currentPosition);
                         }
                     });
                     btRew2.setOnClickListener(view1 -> {
@@ -228,10 +228,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                             currentPosition = 0;
                         playerPosition2.setText(convertFormat(currentPosition));
                         video.seekTo(currentPosition);
-                        seekBar2.postDelayed(() -> seekBar2.setProgress(video.getCurrentPosition()), 100);
+                        if(!video.isPlaying())
+                            seekBar2.setProgress(currentPosition);
                     });
                     video.setOnPreparedListener(mediaPlayer1 -> {
                         playerDuration2.setText(convertFormat(video.getDuration()));
+                        seekBar2.setMax(video.getDuration());
                         seekBar2.postDelayed(runnable2, 0);
                     });
                     seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -240,7 +242,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                             if (fromUser) {
                                 video.pause();
                                 video.seekTo(progress);
-                                video.start();
+                                if(btPause2.isShown())
+                                    video.start();
                             }
                             playerPosition2.setText(convertFormat(video.getCurrentPosition()));
                         }
@@ -253,7 +256,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
                         @Override
                         public void onStopTrackingTouch(SeekBar seekBar) {
-                            video.start();
+                            if(btPause2.isShown())
+                                video.start();
                         }
                     });
                     video.setOnCompletionListener(mediaPlayer -> {
@@ -264,7 +268,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     });
 
                 } else {
-                    artwork.findViewById(R.id.artworkVideoResource).setVisibility(View.GONE);
                     artwork.findViewById(R.id.videoView).setVisibility(View.GONE);
                 }
 
@@ -275,8 +278,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     Navigation.findNavController(view)
                             .navigate(R.id.action_navHome_to_navIndoor, bundle, new NavOptions.Builder().setPopUpTo(R.id.navHome, true).build());
                 });
-
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(artwork.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                 artwork.show();
+                artwork.getWindow().setAttributes(lp);
                 artwork.setCanceledOnTouchOutside(true);
             }
         }

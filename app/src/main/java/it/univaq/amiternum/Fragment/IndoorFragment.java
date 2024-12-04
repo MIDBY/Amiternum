@@ -55,6 +55,7 @@ public class IndoorFragment extends Fragment {
     private Oggetto3D oggetto;
     private int secondsElapsed = 0;
     private Dialog dialog;
+    private AnchorNode anchorNode;
 
     private final ActivityResultLauncher<String> launcherCamera = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), result -> {
@@ -68,7 +69,10 @@ public class IndoorFragment extends Fragment {
             result -> {
                 if(result.getContents() != null) {
                     oggetto = handleQRCode(result.getContents());
-                    renderText(requireView(), getString(R.string.tapScreen));
+                    if(oggetto != null)
+                        renderText(requireView(), getString(R.string.tapScreen));
+                    else
+                        renderText(requireView(), getString(R.string.QRNotFound));
                 }
     });
 
@@ -97,22 +101,23 @@ public class IndoorFragment extends Fragment {
             }
         }
 
+        if(oggetto == null)
+            renderText(view, getString(R.string.scanText));
+
         arFragment = (ArFragment) getChildFragmentManager().findFragmentById(R.id.ar_fragment);
         arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-            if (oggetto != null && oggetto.getGltfUrlFile() != null && !oggetto.getGltfUrlFile().isEmpty())
-                placeModel(hitResult.createAnchor());
-            else
+            if (oggetto == null || oggetto.getGltfUrlFile() == null || oggetto.getGltfUrlFile().isEmpty())
                 renderText(view, getString(R.string.scanText));
+            else
+                if (anchorNode == null && dialog == null || (dialog != null && !dialog.isShowing()))
+                    placeModel(hitResult.createAnchor());
         }));
 
         view.findViewById(R.id.launchScanner).setOnClickListener(v -> startQrCodeScanner());
     }
 
     private void placeModel(Anchor anchor) {
-        for (int j = arFragment.getArSceneView().getScene().getChildren().size()-1; j>=1 ; j--) {
-            Node childNode = arFragment.getArSceneView().getScene().getChildren().get(j);
-            arFragment.getArSceneView().getScene().removeChild(childNode);
-        }
+        removeChilds();
 
         if(oggetto.getId() % 2 != 0) {
             Handler handler = new Handler();
@@ -127,7 +132,7 @@ public class IndoorFragment extends Fragment {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            secondsElapsed++;
+                            secondsElapsed = secondsElapsed + 1;
                             counter.setText(secondsElapsed + "");
                             handler.postDelayed(this, 1000);
                         }
@@ -135,9 +140,9 @@ public class IndoorFragment extends Fragment {
                 }
             });
 
-            dialog.show();
             dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            dialog.show();
             ModelRenderable.builder()
                     .setSource(requireContext(),
                             RenderableSource.builder()
@@ -155,10 +160,11 @@ public class IndoorFragment extends Fragment {
                                 .setShadowCastingEnabled(true)
                                 .setIntensity(200f)
                                 .build();
-                        AnchorNode anchorNode = new AnchorNode(anchor);
+                        anchorNode = new AnchorNode(anchor);
                         anchorNode.setRenderable(renderable);
                         anchorNode.setLight(light);
                         anchorNode.setLocalScale(new Vector3(1f, 1f, 1f));
+                        anchorNode.setOnTapListener((hitTestResult, motionEvent) -> removeChilds());
                         arFragment.getArSceneView().getScene().addChild(anchorNode);
                     })
                     .exceptionally(throwable -> {
@@ -176,34 +182,37 @@ public class IndoorFragment extends Fragment {
             ((TextView) infoPanel.findViewById(R.id.subtitleTextViewAr)).setText(oggetto.getDescrizione());
 
             ViewRenderable.builder()
-                    .setView(requireContext(), infoPanel)
-                    .build()
-                    .thenAccept(renderable -> {
-                        Node textViewNodeCycle = new Node();
-                        Pose worldPose = anchor.getPose();
-                        float scaleFactor = 1f;
-                        textViewNodeCycle.setRenderable(renderable);
-                        textViewNodeCycle.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
-                        float[] deviceRotation = worldPose.getRotationQuaternion();
-                        Quaternion quaternion = new Quaternion(deviceRotation[0], deviceRotation[1], deviceRotation[2], deviceRotation[3]);
-                        Vector3 direction = Vector3.subtract(textViewNodeCycle.getWorldPosition(),
-                                new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
-                        Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
-                        Quaternion finalRotation = Quaternion.multiply(quaternion.inverted(), lookRotation);
-                        textViewNodeCycle.setWorldRotation(finalRotation);
-                        AnchorNode anchorNodeCycle = new AnchorNode(anchor);
-                        anchorNodeCycle.addChild(textViewNodeCycle);
-                        arFragment.getArSceneView().getScene().addChild(anchorNodeCycle);
-                    });
+                .setView(requireContext(), infoPanel)
+                .build()
+                .thenAccept(renderable -> {
+                    Node infoPanelNode = new Node();
+                    Pose worldPose = anchor.getPose();
+                    float scaleFactor = 1f;
+                    infoPanelNode.setRenderable(renderable);
+                    infoPanelNode.setLocalScale(new Vector3(scaleFactor, scaleFactor, scaleFactor));
+                    float[] deviceRotation = worldPose.getRotationQuaternion();
+                    Quaternion quaternion = new Quaternion(deviceRotation[0], deviceRotation[1], deviceRotation[2], deviceRotation[3]);
+                    Vector3 direction = Vector3.subtract(infoPanelNode.getWorldPosition(),
+                            new Vector3(worldPose.tx(), worldPose.ty(), worldPose.tz()));
+                    Quaternion lookRotation = Quaternion.lookRotation(direction, Vector3.up());
+                    Quaternion finalRotation = Quaternion.multiply(quaternion.inverted(), lookRotation);
+                    infoPanelNode.setWorldRotation(finalRotation);
+                    anchorNode = new AnchorNode(anchor);
+                    anchorNode.addChild(infoPanelNode);
+                    anchorNode.setOnTapListener((hitTestResult, motionEvent) -> removeChilds());
+                    arFragment.getArSceneView().getScene().addChild(anchorNode);
+                });
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        arFragment.onPause();
+        if(arFragment.getArSceneView() != null)
+            arFragment.onPause();
         if(dialog != null && dialog.isShowing()) {
             dialog.dismiss();
+            secondsElapsed = 0;
             Toast.makeText(requireContext(), getString(R.string.impatientText), Toast.LENGTH_SHORT).show();
         }
     }
@@ -211,13 +220,15 @@ public class IndoorFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        arFragment.onDestroy();
+        if(arFragment.getArSceneView() != null)
+            arFragment.onDestroy();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        arFragment.onResume();
+        if(arFragment.getArSceneView() != null)
+            arFragment.onResume();
     }
 
     public void startQrCodeScanner() {
@@ -244,7 +255,7 @@ public class IndoorFragment extends Fragment {
         banner.setText(text);
         AlphaAnimation alphaAnim = new AlphaAnimation(1.0f, 0.0f);
         alphaAnim.setStartOffset(2000);
-        alphaAnim.setDuration(5000);
+        alphaAnim.setDuration(4000);
         alphaAnim.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -252,13 +263,21 @@ public class IndoorFragment extends Fragment {
             }
 
             public void onAnimationEnd(Animation animation) {
-                banner.setVisibility(View.INVISIBLE);
+                banner.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
-        banner.setAnimation(alphaAnim);
+        banner.startAnimation(alphaAnim);
+    }
+
+    private void removeChilds() {
+        for (int j = arFragment.getArSceneView().getScene().getChildren().size()-1; j>=1 ; j--) {
+            Node childNode = arFragment.getArSceneView().getScene().getChildren().get(j);
+            arFragment.getArSceneView().getScene().removeChild(childNode);
+        }
+        anchorNode = null;
     }
 }

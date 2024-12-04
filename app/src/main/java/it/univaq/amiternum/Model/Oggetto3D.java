@@ -19,8 +19,6 @@ public class Oggetto3D implements Serializable {
     private String urlAudio;
     private String urlVideo;
     private String urlFiles;
-    //TODO:elimina attributo con sue classi
-    private String resourcePath;
 
     public static Oggetto3D parseJson(JSONObject json){
         Oggetto3D oggetto = new Oggetto3D();
@@ -95,14 +93,6 @@ public class Oggetto3D implements Serializable {
 
     public void setUrlFiles(String urlFiles) {
         this.urlFiles = urlFiles;
-    }
-
-    public String getResourcePath() {
-        return resourcePath;
-    }
-
-    public void setResourcePath(String resourcePath) {
-        this.resourcePath = resourcePath;
     }
 
     public String getFirstUrlFileByExtension(String extension) {

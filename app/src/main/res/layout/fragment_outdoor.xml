@@ -32,7 +32,6 @@
         android:contentDescription="@string/icon"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginStart="8dp"
         app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

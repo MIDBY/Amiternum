@@ -35,10 +35,6 @@ public class GetData {
             }
 
             @Override
-            public void onRequestUpdate(int progress) {
-            }
-
-            @Override
             public void onRequestFailed() {
                 Log.d("CONNECTION FAILED","problemi nella richiesta");
             }
@@ -68,9 +64,6 @@ public class GetData {
                 }
                 DB.getInstance(context).getOggettoDao().insert(oggetti);
             }
-
-            @Override
-            public void onRequestUpdate(int progress) {}
 
             @Override
             public void onRequestFailed() {
