@@ -95,6 +95,14 @@ public class Oggetto3D implements Serializable {
         this.urlFiles = urlFiles;
     }
 
+    public String getUrlFileByString(String type, String extension) {
+        List<String> files = getUrlFilesAsList();
+        for (String s : files)
+            if(s.contains("_" + type + ".png"))
+                return s;
+        return getFirstUrlFileByExtension(extension);
+    }
+
     public String getFirstUrlFileByExtension(String extension) {
         List<String> files = getUrlFilesAsList();
         if(extension.equals("jpg") || extension.equals("png")) {

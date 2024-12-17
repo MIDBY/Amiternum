@@ -23,7 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:navGraph="@navigation/nav_ui"
-        android:background="@drawable/sfondo2"/>
+        android:background="@drawable/geometric_background"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

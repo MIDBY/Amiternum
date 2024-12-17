@@ -290,7 +290,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         public void onbind(Oggetto3D oggetto) {
             title.setText(oggetto.getNome());
             if(oggetto.getUrlFiles() != null) {
-                Picasso.get().load(oggetto.getFirstUrlFileByExtension("jpg")).resize(300, 126).centerCrop().into(image);
+                Picasso.get().load(oggetto.getUrlFileByString("intro", "jpg")).resize(300, 126).centerCrop().into(image);
             }
         }
 
