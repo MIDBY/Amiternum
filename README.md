@@ -50,3 +50,23 @@ La risorsa tridimensionale potrà essere l'opera stessa, un'opera affine, oppure
  - L'area mappa mostra la posizione del dispositivo e la posizione dei vari punti d'interesse.
 
 ### Immagini delle schermate
+
+Schermata di accesso
+<br>
+<img src="https://github.com/MIDBY/Amiternum/blob/master/info/Accesso.jpg" width="300">
+
+
+<br>
+Schermata Home
+<br>
+<img src="https://github.com/MIDBY/Amiternum/blob/master/info/Home.jpg" width="300">
+
+<br>
+Schermata Indoor
+<br>
+<img src="https://github.com/MIDBY/Amiternum/blob/master/info/Indoor.jpg" width="300">
+
+<br>
+Schermata Outdoor
+<br>
+<img src="https://github.com/MIDBY/Amiternum/blob/master/info/Outdoor.jpg" width="300">
